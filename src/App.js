@@ -108,6 +108,7 @@ const translations = {
       close: 'Sluit pop-up',
       privacyPolicy: 'Privacybeleid',
       becomeRegularGuest: 'Word stamgast!',
+      becomeRegularGuestShort: 'Stamgast',
       forEvent: 'voor %s',
       onThisDay: 'op deze dag',
       noContentAvailable: 'Geen inhoud beschikbaar voor deze pop-up.',
@@ -188,6 +189,8 @@ const translations = {
       underlineLinks: 'Onderstreep links',
       readableFont: 'Leesbaar lettertype',
       resetAccessibility: 'Reset',
+      general: 'Algemeen',
+      footerText: 'Het Café Theater Festival wordt mede mogelijk gemaakt door haar partners en begunstigers:'
     },
     genres: {
         'Muziektheater': 'Muziektheater', 'Dans': 'Dans', 'Theater': 'Theater',
@@ -211,7 +214,7 @@ const translations = {
       text: `Niet iedereen houdt van een druk en vol café en daarom hebben we de Rustige Route in het leven geroepen. Per festival zijn er twee voorstellingen waarbij het mogelijk is om een plek te reserveren, waardoor je verzekerd bent van een plaats. Daarnaast zullen de gekozen voorstellingen ook rustiger zijn dan sommige andere voorstellingen op het festival.\n\nLet op: de voorstellingen in de rustige route zijn niet prikkel-arm. Vanwege het onvoorspelbare karakter van de caféruimte en het feit dat veel voorstellingen de hele ruimte gebruiken kunnen we bij geen enkel voorstelling een prikkel-arme omgeving garanderen.`,
       button: 'Reserveer een plekje'
     },
-    privacyPolicyContent: `**Privacybeleid voor de Café Theater Festival Timetable App**\n\n*Laatst bijgewerkt: 30 juni 2025*\n\nWelkom bij de Café Theater Festival Timetable App. Deze app is ontworpen om u te helpen de timetable van het festival te bekijken, voorstellingen als favoriet te markeren, herinneringen in te stellen en evenementen aan uw agenda toe te voegen.\n\nUw privacy is belangrijk voor ons. Dit privacybeleid beschrijft hoe wij informatie verzamelen, gebruiken en beschermen wanneer u onze app gebruikt.\n\n**1. Welke Informatie Verzamelen Wij?**\n\nDeze app is een statische webapplicatie die uitsluitend lokaal in uw browser (of via een WebView op Android) draait. Wij verzamelen geen persoonlijk identificeerbare informatie.\n\n- **Favoriete Voorstellingen**: Wanneer u een voorstelling als favoriet markeert, wordt deze informatie uitsluitend lokaal opgeslagen op uw apparaat in de lokale opslag van de browser (localStorage). Deze gegevens worden niet naar externe servers verzonden en zijn alleen toegankelijk voor u.\n- **Notificatietoestemming**: De app kan u om toestemming vragen om browsernotificaties te tonen voor herinneringen aan voorstellingen. Uw keuze wordt lokaal door uw browser beheerd en niet door ons verzameld of opgeslagen.\n- **Zoekopdrachten**: Zoektermen die u invoert, worden niet opgeslagen of verzonden. Ze worden alleen gebruikt om lokaal de timetable te filteren.\n\n**2. Hoe Gebruiken Wij Uw Informatie?**\n\nDe lokaal opgeslagen informatie wordt alleen gebruikt om u een gepersonaliseerde ervaring binnen de app te bieden.\n\n**3. Delen van Uw Informatie**\n\nWij delen uw informatie met niemand. Aangezien we geen persoonlijke informatie verzamelen, is er geen informatie om te delen.\n\n**4. Externe Links**\n\nDeze app bevat links naar externe websites (bijv. Google Calendar). Wanneer u op deze links klikt, verlaat u onze app. Wij zijn niet verantwoordelijk voor het privacybeleid van andere websites.\n\n**5. Beveiliging**\n\nAangezien alle relevante gegevens lokaal op uw apparaat worden opgeslagen, zijn de beveiligingsrisico's minimaal.\n\n**6. Wijzigingen in Dit Privacybeleid**\n\nWe kunnen dit privacybeleid van tijd tot tijd bijwerken. Wijzigingen zijn onmiddellijk van kracht nadat ze in de app zijn geplaatst.\n\n**7. Contact Met Ons Opnemen**\n\nAls u vragen heeft over dit privacybeleid, kunt u contact met ons opnemen via: Info@cafetheaterfestival.nl`
+    privacyPolicyContent: `**Privacybeleid voor de Café Theater Festival webapp**\n\n*Laatst bijgewerkt: 30 juni 2025*\n\nWelkom bij de Café Theater Festival webapp. Deze app is ontworpen om u te helpen de timetable van het festival te bekijken, voorstellingen als favoriet te markeren, herinneringen in te stellen en evenementen aan uw agenda toe te voegen.\n\nUw privacy is belangrijk voor ons. Dit privacybeleid beschrijft hoe wij informatie verzamelen, gebruiken en beschermen wanneer u onze app gebruikt.\n\n**1. Welke Informatie Verzamelen Wij?**\n\nDeze app is een statische webapplicatie die uitsluitend lokaal in uw browser (of via een WebView op Android) draait. Wij verzamelen geen persoonlijk identificeerbare informatie.\n\n- **Favoriete Voorstellingen**: Wanneer u een voorstelling als favoriet markeert, wordt deze informatie uitsluitend lokaal opgeslagen op uw apparaat in de lokale opslag van de browser (localStorage). Deze gegevens worden niet naar externe servers verzonden en zijn alleen toegankelijk voor u.\n- **Notificatietoestemming**: De app kan u om toestemming vragen om browsernotificaties te tonen voor herinneringen aan voorstellingen. Uw keuze wordt lokaal door uw browser beheerd en niet door ons verzameld of opgeslagen.\n- **Zoekopdrachten**: Zoektermen die u invoert, worden niet opgeslagen of verzonden. Ze worden alleen gebruikt om lokaal de timetable te filteren.\n\n**2. Hoe Gebruiken Wij Uw Informatie?**\n\nDe lokaal opgeslagen informatie wordt alleen gebruikt om u een gepersonaliseerde ervaring binnen de app te bieden.\n\n**3. Delen van Uw Informatie**\n\nWij delen uw informatie met niemand. Aangezien we geen persoonlijke informatie verzamelen, is er geen informatie om te delen.\n\n**4. Externe Links**\n\nDeze app bevat links naar externe websites (bijv. Google Calendar). Wanneer u op deze links klikt, verlaat u onze app. Wij zijn niet verantwoordelijk voor het privacybeleid van andere websites.\n\n**5. Beveiliging**\n\nAangezien alle relevante gegevens lokaal op uw apparaat worden opgeslagen, zijn de beveiligingsrisico's minimaal.\n\n**6. Wijzigingen in Dit Privacybeleid**\n\nWe kunnen dit privacybeleid van tijd tot tijd bijwerken. Wijzigingen zijn onmiddellijk van kracht nadat ze in de app zijn geplaatst.\n\n**7. Contact Met Ons Opnemen**\n\nAls u vragen heeft over dit privacybeleid, kunt u contact met ons opnemen via: Info@cafetheaterfestival.nl`
   },
   en: {
     common: {
@@ -228,7 +231,8 @@ const translations = {
       news: 'News',
       addToFavorites: 'Add to favorites (get reminder)', removeFromFavorites: 'Remove from favorites (cancel reminder)',
       addToGoogleCalendar: 'Add to Google Calendar', sharePerformance: 'Share performance',
-      close: 'Close popup', privacyPolicy: 'Privacy Policy', becomeRegularGuest: 'Become a regular guest!',
+      close: 'Close popup', privacyPolicy: 'Privacy Policy', becomeRegularGuest: 'Become a Stamgast!',
+      becomeRegularGuestShort: 'Stamgast',
       forEvent: 'for %s', onThisDay: 'on this day',
       noContentAvailable: 'No content available for this popup.',
       'openLocationInGoogleMaps': 'Open location in Google Maps',
@@ -273,9 +277,15 @@ const translations = {
       filterScopeAllEvents: 'All events', filterScopeThisEvent: 'This event',
       filterByGenre: 'Filter by genre...', filterScopeLabel: 'Apply filter',
       readPage: 'Read page aloud', readPerformance: 'Read performance aloud', readPopup: 'Read popup aloud',
-      accessibility: 'Accessibility', grayscale: 'Grayscale', highContrast: 'High Contrast',
-      negativeContrast: 'Negative Contrast', underlineLinks: 'Underline Links',
-      readableFont: 'Readable Font', resetAccessibility: 'Reset',
+      accessibility: 'Accessibility',
+      grayscale: 'Grayscale',
+      highContrast: 'High Contrast',
+      negativeContrast: 'Negative Contrast',
+      underlineLinks: 'Underline Links',
+      readableFont: 'Readable Font',
+      resetAccessibility: 'Reset',
+      general: 'General',
+      footerText: 'The Café Theater Festival is made possible by its partners and benefactors:'
     },
     genres: {
         'Muziektheater': 'Musical Theatre', 'Musical': 'Musical', 'Opera': 'Opera', 'Dans': 'Dance',
@@ -301,7 +311,7 @@ const translations = {
         text: `Not everyone enjoys a crowded and busy café, which is why we created the Calm Route. For each festival, there are two performances for which it is possible to reserve a spot, ensuring you have a seat. Additionally, the selected performances will also be quieter than some other performances at the festival.\n\nPlease note: the performances in the calm route are not low-stimulus. Due to the unpredictable nature of the café space and the fact that many performances use the entire space, we cannot guarantee a low-stimulus environment for any performance.`,
         button: 'Reserve a spot'
     },
-    privacyPolicyContent: `**Privacy Policy for the Café Theater Festival Timetable App**\n\n*Last updated: June 30, 2025*\n\nWelcome to the Café Theater Festival Timetable App. This app is designed to help you view the festival timetable, mark performances as favorites, set reminders, and add events to your calendar.\n\nYour privacy is important to us. This privacy policy describes how we collect, use, and protect information when you use our app.\n\n**1. What Information Do We Collect?**\n\nThis app is a static web application that runs exclusively locally in your browser (or via a WebView on Android). We do not collect any personally identifiable information.\n\n- **Favorite Performances**: When you mark a performance as a favorite, this information is stored exclusively locally on your device in the browser's local storage (localStorage). This data is not sent to external servers and is only accessible to you.\n- **Notification Permission**: The app may ask for your permission to display browser notifications for performance reminders. Your choice is managed locally by your browser and not collected or stored by us.\n- **Search Queries**: Search terms you enter are not stored or sent. They are only used to filter the timetable locally.\n\n**2. How Do We Use Your Information?**\n\nThe locally stored information is only used to provide you with a personalized experience within the app.\n\n**3. Sharing Your Information**\n\nWe do not share your information with anyone. Aangezien we geen persoonlijke informatie verzamelen, is er geen informatie om te delen.\n\n**4. External Links**\n\nThis app contains links to external websites (e.g., Google Calendar). When you click these links, you leave our app. We are not responsible for the privacy practices of other websites.\n\n**5. Beveiliging**\n\nAangezien alle relevante gegevens lokaal op uw apparaat worden opgeslagen, zijn de beveiligingsrisico's minimaal.\n\n**6. Wijzigingen in Dit Privacybeleid**\n\nWe may update this privacy policy from time to time. Changes are immediate after being posted in the app.\n\n**7. Contact Us**\n\nIf you have questions about this privacy policy, you can contact us at: Info@cafetheaterfestival.nl`
+    privacyPolicyContent: `**Privacy Policy for the Café Theater Festival Webapp**\n\n*Last updated: June 30, 2025*\n\nWelcome to the Café Theater Festival Webapp. This app is designed to help you view the festival timetable, mark performances as favorites, set reminders, and add events to your calendar.\n\nYour privacy is important to us. This privacy policy describes how we collect, use, and protect information when you use our app.\n\n**1. What Information Do We Collect?**\n\nThis app is a static web application that runs exclusively locally in your browser (or via a WebView on Android). We do not collect any personally identifiable information.\n\n- **Favorite Performances**: When you mark a performance as a favorite, this information is stored exclusively locally on your device in the browser's local storage (localStorage). This data is not sent to external servers and is only accessible to you.\n- **Notification Permission**: The app may ask for your permission to display browser notifications for performance reminders. Your choice is managed locally by your browser and not collected or stored by us.\n- **Search Queries**: Search terms you enter are not stored or sent. They are only used to filter the timetable locally.\n\n**2. How Do We Use Your Information?**\n\nThe locally stored information is only used to provide you with a personalized experience within the app.\n\n**3. Sharing Your Information**\n\nWe do not share your information with anyone. Aangezien we geen persoonlijke informatie verzamelen, is er geen informatie om te delen.\n\n**4. External Links**\n\nThis app contains links to external websites (e.g., Google Calendar). When you click these links, you leave our app. We are not responsible for the privacy practices of other websites.\n\n**5. Beveiliging**\n\nAangezien alle relevante gegevens lokaal op uw apparaat worden opgeslagen, zijn de beveiligingsrisico's minimaal.\n\n**6. Wijzigingen in Dit Privacybeleid**\n\nWe may update this privacy policy from time to time. Changes are immediate after being posted in the app.\n\n**7. Contact Us**\n\nIf you have questions about this privacy policy, you can contact us at: Info@cafetheaterfestival.nl`
   },
 };
 
@@ -367,6 +377,9 @@ const renderGenericPopupText = (content) => {
   ));
   return elements;
 };
+
+
+// ========= VERWIJDERD: Zwevende "Word Stamgast" knop (Nudge) =========
 
 
 // ========= NIEUW: Zwevende Toegankelijkheidsknop (Nudge) =========
@@ -480,7 +493,7 @@ const AppHeader = ({ titleRef, translations, language }) => (
 );
 
 // Sticky Header component
-const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavoritesClick, handleFriendsFavoritesClick, handleMoreInfoClick, handleNewsClick, hasFriendsFavorites, selectedEvent, currentView, language, handleLanguageChange, translations, onLogoClick, onReadPage }) => {
+const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavoritesClick, handleFriendsFavoritesClick, handleMoreInfoClick, handleNewsClick, hasFriendsFavorites, selectedEvent, currentView, language, handleLanguageChange, translations, onLogoClick, onReadPage, openContentPopup }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
     
@@ -503,8 +516,15 @@ const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavorit
         <div className={`fixed top-0 left-0 right-0 z-40 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
             <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
                 <div className="relative flex h-24 sm:h-20 items-end justify-center bg-black/20 backdrop-blur-md rounded-b-xl px-4 shadow-lg pb-2">
-                    <div className="absolute left-4 bottom-2">
+                    <div className="absolute left-4 bottom-2 flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-4">
                        <img onClick={onLogoClick} className="h-16 w-auto cursor-pointer" src="https://cafetheaterfestival.nl/wp-content/uploads/2025/06/fav-wit-1.png" alt="[Afbeelding van CTF Logo Favicon]"/>
+                       <button 
+                            onClick={() => openContentPopup('iframe', 'https://form.jotform.com/223333761374051')} 
+                            className="px-4 py-2 rounded-lg font-semibold bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50 transition-colors duration-200 text-sm"
+                        >
+                            <span className="hidden sm:inline">{translations[language].common.becomeRegularGuest}</span>
+                            <span className="sm:hidden">{translations[language].common.becomeRegularGuestShort}</span>
+                        </button>
                     </div>
                     <div className="flex items-center justify-center">
                         <div className="relative" ref={dropdownRef}>
@@ -540,18 +560,32 @@ const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavorit
 };
 
 
-// Component voor de evenementnavigatiebalk op het startscherm
-const EventNavigation = ({ onEventSelect, onFavoritesSelect, onFriendsFavoritesSelect, onMoreInfoSelect, onNewsSelect, hasFriendsFavorites, uniqueEvents, language, translations }) => (
-    <div className="flex flex-wrap justify-center gap-4 mb-8 p-3 max-w-full">
-        {uniqueEvents.map(event => (
-            <button key={event} onClick={() => onEventSelect(event)} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{event}</button>
-        ))}
-        <button onClick={onFavoritesSelect} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{translations[language].common.favorites}</button>
-        {hasFriendsFavorites && <button onClick={onFriendsFavoritesSelect} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{translations[language].common.friendsFavorites}</button>}
-        <button onClick={onMoreInfoSelect} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{translations[language].common.moreInfo}</button>
-        <button onClick={onNewsSelect} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{translations[language].common.news}</button>
-    </div>
-);
+// ========= BIJGEWERKT: Component voor de evenementnavigatiebalk op het startscherm =========
+const EventNavigation = ({ onEventSelect, onFavoritesSelect, onFriendsFavoritesSelect, onMoreInfoSelect, onNewsSelect, hasFriendsFavorites, uniqueEvents, language, translations }) => {
+    const eventButtons = uniqueEvents.map(event => (
+        <button key={event} onClick={() => onEventSelect(event)} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{event}</button>
+    ));
+
+    const utilityButtons = (
+        <>
+            <button onClick={onFavoritesSelect} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{translations[language].common.favorites}</button>
+            {hasFriendsFavorites && <button onClick={onFriendsFavoritesSelect} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{translations[language].common.friendsFavorites}</button>}
+            <button onClick={onMoreInfoSelect} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{translations[language].common.moreInfo}</button>
+            <button onClick={onNewsSelect} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{translations[language].common.news}</button>
+        </>
+    );
+
+    return (
+        <div className="flex flex-col items-center gap-4 mb-8 p-3 max-w-full">
+            <div className="flex flex-wrap justify-center gap-4">
+                {eventButtons}
+            </div>
+            <div className="flex flex-wrap justify-center gap-4">
+                {utilityButtons}
+            </div>
+        </div>
+    );
+};
 
 // Component voor de datumnavigatiebalk
 const DateNavigation = ({ datesForCurrentSelectedEvent, selectedDate, setSelectedDate, setSearchTerm, translations, language, selectedEvent, timetableData }) => {
@@ -1599,9 +1633,46 @@ const OfflineIndicator = ({ isOffline, language, translations, onRetry }) => {
   );
 };
 
-// ========= NIEUW: Meer Info Pagina =========
-const MoreInfoPage = ({ moreInfoItems, openContentPopup, language, translations }) => {
-  if (!moreInfoItems || moreInfoItems.length === 0) {
+// ========= BIJGEWERKT: Meer Info Pagina met Categorieën =========
+const MoreInfoPage = ({ generalInfoItems, accessibilityInfoItems, openContentPopup, language, translations }) => {
+  // Functie om een sectie te renderen, nu met een optie om de titel te tonen
+  const renderInfoSection = (title, items, showTitle = true) => {
+    if (!items || items.length === 0) return null;
+    return (
+      <div className="mb-12">
+        {showTitle && <h2 className="text-3xl font-bold text-white mb-8 text-center drop_shadow-lg">{title}</h2>}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+          {items.map((item, index) => {
+            const itemTitle = item.title[language] || item.title.nl;
+            const itemUrl = item.url[language] || item.url.nl;
+            const itemImageUrl = item.imageUrl[language] || item.imageUrl.nl;
+            
+            return (
+                <div
+                  key={index}
+                  className="bg-white rounded-xl shadow-xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full md:w-[384px]"
+                  onClick={() => openContentPopup('iframe', itemUrl)}
+                >
+                  <img
+                    src={itemImageUrl}
+                    alt={`[Afbeelding van ${itemTitle}]`}
+                    className="w-full h-48 object-cover"
+                    onError={(e) => { e.target.src = 'https://placehold.co/600x400/20747f/FFFFFF?text=Afbeelding+niet+gevonden'; }}
+                  />
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-gray-800">{itemTitle}</h3>
+                  </div>
+                </div>
+            )
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const hasContent = (generalInfoItems && generalInfoItems.length > 0) || (accessibilityInfoItems && accessibilityInfoItems.length > 0);
+
+  if (!hasContent) {
     return (
       <div className="text-center text-white p-4 bg-white bg-opacity-20 rounded-xl shadow-lg">
         Geen extra informatie beschikbaar.
@@ -1610,34 +1681,17 @@ const MoreInfoPage = ({ moreInfoItems, openContentPopup, language, translations 
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
-      <h2 className="text-3xl font-bold text-white mb-8 text-center drop_shadow-lg">
-        {translations[language].common.moreInfo}
-      </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-        {moreInfoItems.map((item, index) => (
-          <div
-            key={index}
-            className="bg-white rounded-xl shadow-xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full md:w-[384px]"
-            onClick={() => openContentPopup('iframe', item.url)}
-          >
-            <img
-              src={item.imageUrl}
-              alt={`[Afbeelding van ${item.title}]`}
-              className="w-full h-48 object-cover"
-              onError={(e) => { e.target.src = 'https://placehold.co/600x400/20747f/FFFFFF?text=Afbeelding+niet+gevonden'; }}
-            />
-            <div className="p-4">
-              <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="w-full max-w-6xl mx-auto pt-20">
+      {/* Sectie 'Algemeen' wordt nu zonder titel gerenderd */}
+      {renderInfoSection(translations[language].common.general, generalInfoItems, false)}
+      {/* Sectie 'Toegankelijkheid' wordt met titel gerenderd */}
+      {renderInfoSection(translations[language].common.accessibility, accessibilityInfoItems, true)}
     </div>
   );
 };
 
-// ========= NIEUW: Nieuws Pagina =========
+
+// ========= BIJGEWERKT: Nieuws Pagina =========
 const NewsPage = ({ newsItems, openContentPopup, language, translations }) => {
   if (!newsItems || newsItems.length === 0) {
     return (
@@ -1648,40 +1702,131 @@ const NewsPage = ({ newsItems, openContentPopup, language, translations }) => {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
-      <h2 className="text-3xl font-bold text-white mb-8 text-center drop_shadow-lg">
-        {translations[language].common.news}
-      </h2>
+    <div className="w-full max-w-6xl mx-auto pt-20">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-        {newsItems.map((item, index) => (
-          <div
-            key={index}
-            className="bg-white rounded-xl shadow-xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full md:w-[384px]"
-            onClick={() => openContentPopup('iframe', item.url)}
-          >
-            <img
-              src={item.imageUrl}
-              alt={`[Afbeelding van ${item.title}]`}
-              className="w-full h-48 object-cover"
-              onError={(e) => { e.target.src = 'https://placehold.co/600x400/20747f/FFFFFF?text=Afbeelding+niet+gevonden'; }}
-            />
-            <div className="p-4">
-              <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
+        {newsItems.map((item, index) => {
+          const itemTitle = item.title[language] || item.title.nl;
+          const itemUrl = item.url[language] || item.url.nl;
+          const itemImageUrl = item.imageUrl[language] || item.imageUrl.nl;
+
+          return (
+            <div
+              key={index}
+              className="bg-white rounded-xl shadow-xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full md:w-[384px]"
+              onClick={() => openContentPopup('iframe', itemUrl)}
+            >
+              <img
+                src={itemImageUrl}
+                alt={`[Afbeelding van ${itemTitle}]`}
+                className="w-full h-48 object-cover"
+                onError={(e) => { e.target.src = 'https://placehold.co/600x400/20747f/FFFFFF?text=Afbeelding+niet+gevonden'; }}
+              />
+              <div className="p-4">
+                <h3 className="text-lg font-semibold text-gray-800">{itemTitle}</h3>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   );
 };
 
 
-// ========= NIEUW: Footer Component =========
-const AppFooter = () => (
-    <footer className="w-full bg-black bg-opacity-20 text-white text-center p-4 mt-8">
-        <p className="text-sm">&copy; 2025 Café Theater Festival. Alle rechten voorbehouden.</p>
-    </footer>
-);
+// ========= BIJGEWERKT: Footer Component met Logo Slider =========
+const AppFooter = ({ logos, language, translations }) => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const containerRef = useRef(null);
+    const intervalRef = useRef(null);
+    const timeoutRef = useRef(null);
+
+    // Dupliceer de logo's voor een naadloze, oneindige loop
+    const extendedLogos = useMemo(() => {
+        if (!logos || logos.length < 6) return logos || []; // Geen loop als er te weinig logo's zijn
+        return [...logos, ...logos]; // Eén keer dupliceren is genoeg
+    }, [logos]);
+
+    useEffect(() => {
+        // Stop en wis vorige intervals/timeouts
+        clearInterval(intervalRef.current);
+        clearTimeout(timeoutRef.current);
+
+        if (!logos || logos.length < 6) return; // Geen animatie starten
+
+        intervalRef.current = setInterval(() => {
+            setCurrentIndex(prev => prev + 6);
+        }, 20000); // 20 seconden
+
+        return () => {
+            clearInterval(intervalRef.current);
+            clearTimeout(timeoutRef.current);
+        };
+    }, [logos]);
+
+    useEffect(() => {
+        if (!containerRef.current || !extendedLogos.length || logos.length < 6) return;
+        
+        const container = containerRef.current;
+        const logoItem = container.children[0];
+        if (!logoItem) return;
+
+        const styles = window.getComputedStyle(logoItem);
+        const marginLeft = parseFloat(styles.marginLeft);
+        const marginRight = parseFloat(styles.marginRight);
+        const itemWidth = logoItem.offsetWidth + marginLeft + marginRight;
+        
+        const scrollAmount = currentIndex * itemWidth;
+        
+        container.style.transition = 'transform 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
+        container.style.transform = `translateX(-${scrollAmount}px)`;
+
+        // Als de huidige index de originele lijst overschrijdt, plannen we een reset
+        if (currentIndex >= logos.length) {
+            timeoutRef.current = setTimeout(() => {
+                const newIndex = currentIndex % logos.length;
+                container.style.transition = 'none';
+                const newScrollAmount = newIndex * itemWidth;
+                container.style.transform = `translateX(-${newScrollAmount}px)`;
+                
+                // Wacht tot de transform is toegepast, update dan de state
+                requestAnimationFrame(() => {
+                    setCurrentIndex(newIndex);
+                });
+
+            }, 1500); // Moet gelijk zijn aan de transitieduur
+        }
+
+    }, [currentIndex, logos, extendedLogos.length]);
+
+
+    if (!logos || logos.length === 0) {
+        return null;
+    }
+
+    return (
+        <footer className="w-full bg-black bg-opacity-30 text-white text-center py-6 mt-12 overflow-hidden">
+            <h3 className="text-lg font-semibold mb-4 px-4">{translations[language].common.footerText}</h3>
+            <div className="relative h-24 flex items-center">
+                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#20747f] via-transparent to-[#20747f] z-10 pointer-events-none"></div>
+                <div className="flex" ref={containerRef}>
+                    {extendedLogos.map((logo, index) => (
+                        <div key={index} className="group relative flex-shrink-0 h-24 w-40 flex items-center justify-center mx-8">
+                            <img 
+                                src={logo.url} 
+                                alt={`[Afbeelding van Begunstiger logo ${logo.name}]`}
+                                className="max-h-12 w-auto object-contain transition-transform duration-300 ease-in-out group-hover:scale-125 group-hover:-translate-y-3" 
+                                onError={(e) => { e.target.style.display = 'none'; }}
+                            />
+                            <div className="absolute bottom-full mb-2 w-max px-3 py-1 bg-gray-800 bg-opacity-80 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out pointer-events-none z-20">
+                                {logo.name}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </footer>
+    );
+};
 
 
 // De hoofdcomponent van de app
@@ -1709,10 +1854,10 @@ const AppContent = () => {
   const [currentSponsorInfo, setCurrentSponsorInfo] = useState(null);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [eventViewMode, setEventViewMode] = useState('card');
   const [favoritesViewMode, setFavoritesViewMode] = useState('card');
   const [friendsFavoritesViewMode, setFriendsFavoritesViewMode] = useState('card');
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [eventViewMode, setEventViewMode] = useState('card');
   const [isContentVisible, setIsContentVisible] = useState(true);
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportConfig, setExportConfig] = useState(null);
@@ -1728,8 +1873,10 @@ const AppContent = () => {
     grayscale: false, highContrast: false, negativeContrast: false,
     underlineLinks: false, readableFont: false,
   });
-  const [moreInfoData, setMoreInfoData] = useState([]);
-  const [newsData, setNewsData] = useState([]); // NIEUW: State voor Nieuws data
+  const [generalInfoData, setGeneralInfoData] = useState([]);
+  const [accessibilityInfoData, setAccessibilityInfoData] = useState([]);
+  const [newsData, setNewsData] = useState([]);
+  const [benefactorLogos, setBenefactorLogos] = useState([]);
 
   const titleRef = useRef(null);
   const sponsorRef = useRef(null);
@@ -1930,8 +2077,10 @@ const AppContent = () => {
     }
   }, []);
 
+  // BIJGEWERKT: Voorleesfunctie voor correcte content op info/nieuws pagina's
   const handleReadPage = useCallback(() => {
     let textToSpeak = '';
+    
     if (isInitialLoad) {
         textToSpeak += `${translations[language].common.timetable}. `;
         textToSpeak += `${translations[language].common.chooseCity}. `;
@@ -1940,15 +2089,21 @@ const AppContent = () => {
         if (friendsFavorites.size > 0) {
             textToSpeak += `${translations[language].common.friendsFavorites}. `;
         }
-    } else {
+    } else if (currentView === 'more-info') {
+        textToSpeak += `${translations[language].common.moreInfo}. `;
+        const generalTitles = generalInfoData.map(item => item.title[language] || item.title.nl).join(', ');
+        const accessibilityTitles = accessibilityInfoData.map(item => item.title[language] || item.title.nl).join(', ');
+        if (generalTitles) textToSpeak += `${translations[language].common.general}: ${generalTitles}. `;
+        if (accessibilityTitles) textToSpeak += `${translations[language].common.accessibility}: ${accessibilityTitles}.`;
+    } else if (currentView === 'news') {
+        textToSpeak += `${translations[language].common.news}. `;
+        const newsTitles = newsData.map(item => item.title[language] || item.title.nl).join(', ');
+        if (newsTitles) textToSpeak += newsTitles;
+    } else { // Timetable, favorites, etc.
         if (currentView === 'favorites') {
             textToSpeak += `${translations[language].common.favorites}. `;
         } else if (currentView === 'friends-favorites') {
             textToSpeak += `${translations[language].common.friendsFavorites}. `;
-        } else if (currentView === 'more-info') {
-            textToSpeak += `${translations[language].common.moreInfo}. `;
-        } else if (currentView === 'news') {
-            textToSpeak += `${translations[language].common.news}. `;
         } else if (selectedEvent) {
             textToSpeak += `${selectedEvent}. `;
             if (selectedDate && selectedDate !== 'all-performances' && selectedDate !== 'calm-route') {
@@ -1977,7 +2132,7 @@ const AppContent = () => {
         }
     }
     speak(textToSpeak, language);
-  }, [isInitialLoad, translations, language, uniqueEvents, friendsFavorites, currentView, selectedEvent, selectedDate, formattedData, searchTerm, speak]);
+  }, [isInitialLoad, translations, language, uniqueEvents, friendsFavorites, currentView, selectedEvent, selectedDate, formattedData, searchTerm, speak, generalInfoData, accessibilityInfoData, newsData]);
 
 
   const handleAnimatedUpdate = useCallback((updateFunction) => {
@@ -2126,6 +2281,7 @@ const AppContent = () => {
   }, []);
 
   const returnToInitialView = useCallback(() => {
+      setCurrentView('timetable'); // Reset de view naar de standaard
       setIsInitialLoad(true);
       setSelectedEvent(null);
       setSelectedDate(null);
@@ -2317,11 +2473,17 @@ const AppContent = () => {
       const storedFriendsFavorites = JSON.parse(localStorage.getItem('ctfFriendsFavorites'));
       if (storedFriendsFavorites) setFriendsFavorites(new Set(storedFriendsFavorites));
       
-      const storedMoreInfo = JSON.parse(localStorage.getItem('ctfMoreInfoCache'));
-      if (storedMoreInfo) setMoreInfoData(storedMoreInfo);
+      const storedGeneralInfo = JSON.parse(localStorage.getItem('ctfGeneralInfoCache'));
+      if (storedGeneralInfo) setGeneralInfoData(storedGeneralInfo);
+
+      const storedAccessibilityInfo = JSON.parse(localStorage.getItem('ctfAccessibilityInfoCache'));
+      if (storedAccessibilityInfo) setAccessibilityInfoData(storedAccessibilityInfo);
       
       const storedNews = JSON.parse(localStorage.getItem('ctfNewsCache'));
-      if (storedNews) setNewsData(storedNews);
+      if (storedNews) setNewsData(JSON.parse(storedNews));
+
+      const storedBenefactorLogos = JSON.parse(localStorage.getItem('ctfBenefactorLogosCache'));
+      if (storedBenefactorLogos) setBenefactorLogos(storedBenefactorLogos);
 
       const storedCustomNotifs = JSON.parse(localStorage.getItem('ctfScheduledCustomNotifications'));
        if (storedCustomNotifs) setScheduledCustomNotifications(new Set(storedCustomNotifs));
@@ -2385,6 +2547,7 @@ const AppContent = () => {
     return cells;
   };
 
+  // BIJGEWERKT: Data ophalen met nieuwe kolomindeling voor vertalingen en begunstigers
   const fetchTimetableData = useCallback(async () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
@@ -2399,21 +2562,36 @@ const AppContent = () => {
         const lines = csvText.split(/\r?\n/).slice(1).filter(line => line.trim() !== '');
         let allParsedData = [];
         const localEventInfoMap = {};
-        const tempMoreInfoItems = [];
-        const tempNewsItems = []; // NIEUW: Array voor nieuwsitems
+        const tempGeneralInfoItems = [];
+        const tempAccessibilityInfoItems = [];
+        const tempNewsItems = [];
+        const tempBenefactorLogos = new Map();
 
         for (let i = 0; i < lines.length; i++) {
             const cells = parseCsvLine(lines[i]);
-            if (cells.length < 32) continue; // Check voor nieuwe kolomindeling
+            if (cells.length < 44) continue;
 
             const [
+                // Bestaande performance kolommen (0-22)
                 crowd, date, time, artist, title, genre, url, artistImageUrl, 
                 event, sponsorLogoUrl, pwycLink, location, googleMapsUrl, 
                 mapNumber, mapImageUrl, wheelchair, children, dutch, english, 
                 dialogue, dining, ngt, calm,
-                _unused_x, _unused_y, _unused_z,
-                moreInfoTitle, moreInfoUrl, moreInfoImageUrl,
-                newsTitle, newsUrl, newsImageUrl // NIEUW: Nieuws kolommen
+                
+                // Kolom X voor begunstigers (23)
+                benefactorLogoUrl,
+                benefactorName, // Kolom Y
+                _unused_z,
+                
+                // Nieuwe kolommen voor Meer Info & Nieuws (26-43)
+                generalInfoTitleNL, generalInfoUrlNL, generalInfoImageUrlNL,
+                generalInfoTitleEN, generalInfoUrlEN, generalInfoImageUrlEN,
+                
+                accessibilityTitleNL, accessibilityUrlNL, accessibilityImageUrlNL,
+                accessibilityTitleEN, accessibilityUrlEN, accessibilityImageUrlEN,
+
+                newsTitleNL, newsUrlNL, newsImageUrlNL,
+                newsTitleEN, newsUrlEN, newsImageUrlEN
             ] = cells.map(cell => cell || '');
 
             if (event) {
@@ -2426,6 +2604,10 @@ const AppContent = () => {
                 }
                 if (mapImageUrl && !localEventInfoMap[event].mapUrl) localEventInfoMap[event].mapUrl = mapImageUrl;
                 if (sponsorLogoUrl && !localEventInfoMap[event].sponsorLogo) localEventInfoMap[event].sponsorLogo = sponsorLogoUrl;
+            }
+
+            if (benefactorLogoUrl) {
+                tempBenefactorLogos.set(benefactorLogoUrl, benefactorName || '');
             }
 
             if (artist || title) {
@@ -2447,20 +2629,27 @@ const AppContent = () => {
                 });
             }
             
-            if (moreInfoTitle && moreInfoUrl && moreInfoImageUrl) {
-                tempMoreInfoItems.push({
-                    title: moreInfoTitle,
-                    url: moreInfoUrl,
-                    imageUrl: moreInfoImageUrl
+            if (generalInfoTitleNL || generalInfoTitleEN) {
+                tempGeneralInfoItems.push({
+                    title: { nl: generalInfoTitleNL, en: generalInfoTitleEN },
+                    url: { nl: generalInfoUrlNL, en: generalInfoUrlEN },
+                    imageUrl: { nl: generalInfoImageUrlNL, en: generalInfoImageUrlEN }
+                });
+            }
+            
+            if (accessibilityTitleNL || accessibilityTitleEN) {
+                tempAccessibilityInfoItems.push({
+                    title: { nl: accessibilityTitleNL, en: accessibilityTitleEN },
+                    url: { nl: accessibilityUrlNL, en: accessibilityUrlEN },
+                    imageUrl: { nl: accessibilityImageUrlNL, en: accessibilityImageUrlEN }
                 });
             }
 
-            // NIEUW: Verwerk nieuws data
-            if (newsTitle && newsUrl && newsImageUrl) {
+            if (newsTitleNL || newsTitleEN) {
                 tempNewsItems.push({
-                    title: newsTitle,
-                    url: newsUrl,
-                    imageUrl: newsImageUrl
+                    title: { nl: newsTitleNL, en: newsTitleEN },
+                    url: { nl: newsUrlNL, en: newsUrlEN },
+                    imageUrl: { nl: newsImageUrlNL, en: newsImageUrlEN }
                 });
             }
         }
@@ -2478,16 +2667,20 @@ const AppContent = () => {
             return perfDate >= cutoffTime;
         });
         
-        const uniqueMoreInfoData = Array.from(new Set(tempMoreInfoItems.map(item => JSON.stringify(item)))).map(item => JSON.parse(item));
-        const uniqueNewsData = Array.from(new Set(tempNewsItems.map(item => JSON.stringify(item)))).map(item => JSON.parse(item)); // NIEUW
+        const uniqueGeneralInfoData = Array.from(new Set(tempGeneralInfoItems.map(item => JSON.stringify(item)))).map(item => JSON.parse(item));
+        const uniqueAccessibilityInfoData = Array.from(new Set(tempAccessibilityInfoItems.map(item => JSON.stringify(item)))).map(item => JSON.parse(item));
+        const uniqueNewsData = Array.from(new Set(tempNewsItems.map(item => JSON.stringify(item)))).map(item => JSON.parse(item));
+        const finalBenefactorLogos = Array.from(tempBenefactorLogos, ([url, name]) => ({ url, name }));
 
         setError(null);
         setIsOffline(false);
         setTimetableData(filteredDataForDisplay);
         setEventInfoMap(localEventInfoMap);
         setUniqueEvents(uniqueEventsForDisplay);
-        setMoreInfoData(uniqueMoreInfoData);
-        setNewsData(uniqueNewsData); // NIEUW
+        setGeneralInfoData(uniqueGeneralInfoData);
+        setAccessibilityInfoData(uniqueAccessibilityInfoData);
+        setNewsData(uniqueNewsData);
+        setBenefactorLogos(finalBenefactorLogos);
         
         localStorage.setItem('ctfTimetableCache', JSON.stringify({
             data: filteredDataForDisplay,
@@ -2495,8 +2688,10 @@ const AppContent = () => {
             uniqueEvents: uniqueEventsForDisplay,
             timestamp: new Date().getTime()
         }));
-        localStorage.setItem('ctfMoreInfoCache', JSON.stringify(uniqueMoreInfoData));
-        localStorage.setItem('ctfNewsCache', JSON.stringify(uniqueNewsData)); // NIEUW
+        localStorage.setItem('ctfGeneralInfoCache', JSON.stringify(uniqueGeneralInfoData));
+        localStorage.setItem('ctfAccessibilityInfoCache', JSON.stringify(uniqueAccessibilityInfoData));
+        localStorage.setItem('ctfNewsCache', JSON.stringify(uniqueNewsData));
+        localStorage.setItem('ctfBenefactorLogosCache', JSON.stringify(finalBenefactorLogos));
         
         return filteredDataForDisplay;
 
@@ -2531,19 +2726,21 @@ const AppContent = () => {
                 setEventInfoMap(eventInfoMap || {});
                 setUniqueEvents(uniqueEvents || []);
             }
-            const cachedMoreInfo = localStorage.getItem('ctfMoreInfoCache');
-            if (cachedMoreInfo) {
-                setMoreInfoData(JSON.parse(cachedMoreInfo));
-            }
+            const cachedGeneralInfo = localStorage.getItem('ctfGeneralInfoCache');
+            if (cachedGeneralInfo) setGeneralInfoData(JSON.parse(cachedGeneralInfo));
+            
+            const cachedAccessibilityInfo = localStorage.getItem('ctfAccessibilityInfoCache');
+            if (cachedAccessibilityInfo) setAccessibilityInfoData(JSON.parse(cachedAccessibilityInfo));
+
             const cachedNews = localStorage.getItem('ctfNewsCache');
-            if (cachedNews) {
-                setNewsData(JSON.parse(cachedNews));
-            }
+            if (cachedNews) setNewsData(JSON.parse(cachedNews));
+
+            const cachedBenefactorLogos = localStorage.getItem('ctfBenefactorLogosCache');
+            if (cachedBenefactorLogos) setBenefactorLogos(cachedBenefactorLogos);
+
         } catch (e) {
             console.error("Kon cache niet laden", e);
-            localStorage.removeItem('ctfTimetableCache');
-            localStorage.removeItem('ctfMoreInfoCache');
-            localStorage.removeItem('ctfNewsCache');
+            localStorage.clear(); // Clear all local storage on parsing error
         }
         
         const fetchedData = await fetchTimetableData();
@@ -3024,7 +3221,8 @@ const AppContent = () => {
               <div className={`transition-opacity duration-500 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
                   <div className={`transition-opacity duration-300 ${isContentVisible ? 'opacity-100' : 'opacity-0'}`}>
                       <MoreInfoPage
-                          moreInfoItems={moreInfoData}
+                          generalInfoItems={generalInfoData}
+                          accessibilityInfoItems={accessibilityInfoData}
                           openContentPopup={openContentPopup}
                           language={language}
                           translations={translations}
@@ -3161,18 +3359,6 @@ const AppContent = () => {
                           <img src={eventInfoMap[selectedEvent].mapUrl} alt={`[Afbeelding van Kaart ${selectedEvent}]`} className="w-full h-auto rounded-lg shadow-lg border-4 border-white/50 hover:border-white transition-all"/>
                       </div>
                   )}
-                  {!loading && !error && !searchTerm && (
-                    <div className="mt-8 mb-32 w-full max-w-lg mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-8">
-                        <div className="w-full sm:w-1/2 cursor-pointer" onClick={() => openContentPopup('text', translations[language].payWhatYouCan)}>
-                            <img src="https://cafetheaterfestival.nl/wp-content/uploads/2025/06/Afbeelding_van_WhatsApp_op_2025-06-24_om_11.16.13_85e74e32-removebg-preview.png" alt="[Afbeelding van Pay What You Can tekst]" className="w-full h-auto"/>
-                        </div>
-                        <div className="w-full sm:w-1/2 flex items-center justify-center">
-                            <button onClick={(e) => { e.stopPropagation(); openContentPopup('iframe', 'https://form.jotform.com/223333761374051'); }} className="px-6 py-3 bg-white text-[#20747f] rounded-lg shadow-md hover:bg-gray-100 transition-all duration-200 text-base font-semibold">
-                                {translations[language].common.becomeRegularGuest}
-                            </button>
-                        </div>
-                    </div>
-                  )}
                 </>
             )}
           </div>
@@ -3209,6 +3395,7 @@ const AppContent = () => {
           handleLanguageChange={handleLanguageChange} 
           translations={translations} 
           onReadPage={handleReadPage}
+          openContentPopup={openContentPopup}
       />
       
       <OfflineIndicator 
@@ -3227,7 +3414,10 @@ const AppContent = () => {
               </div>
             </div>
             <div className="relative z-10 w-full">
-              <div className="absolute top-12 left-4 flex items-center space-x-2">
+              <div className="absolute top-12 left-4 flex flex-col space-y-2 items-start sm:flex-row sm:space-y-0 sm:space-x-2 sm:items-center">
+                  <button onClick={() => openContentPopup('iframe', 'https://form.jotform.com/223333761374051')} className="px-3 py-1 h-8 sm:h-10 rounded-full bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50 transition-colors duration-200 text-sm font-semibold">
+                    {translations[language].common.becomeRegularGuest}
+                  </button>
                   <button onClick={() => setShowPrivacyPolicy(true)} className="px-3 py-1 h-8 sm:h-10 rounded-full bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50 transition-colors duration-200 text-sm font-semibold">
                     {translations[language].common.privacyPolicy}
                   </button>
@@ -3266,7 +3456,7 @@ const AppContent = () => {
         </div>
       </div>
       
-      <AppFooter />
+      {(currentView === 'more-info' || currentView === 'news') && <AppFooter logos={benefactorLogos} language={language} translations={translations} />}
 
       <PopupModal showPopup={showPopup} closePopup={closePopup} popupContent={popupContent} language={language} translations={translations} speak={speak} />
       <PrivacyPolicyModal showPrivacyPolicy={showPrivacyPolicy} setShowPrivacyPolicy={setShowPrivacyPolicy} language={language} renderPrivacyPolicyContent={renderPrivacyPolicyContent} translations={translations} speak={speak} />
@@ -3347,4 +3537,4 @@ const App = () => (
 );
 
 
-export default App;
+export default App
