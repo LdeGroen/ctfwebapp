@@ -1,7 +1,25 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { Client, Databases, Query } from 'appwrite';
+
+// ========= Appwrite Configuratie =========
+const APPWRITE_CONFIG = {
+    endpoint: 'https://cloud.appwrite.io/v1',
+    projectId: '6874f0b40015fc341b14',
+    databaseId: '68873afd0015cc5075e5',
+    collections: {
+        companies: '68873b5f0032519e7321',
+        performances: '68873b6500074288e73d',
+        locations: '68878ee7000cb07ef9e7',
+        executions: '68878f2d0020be3a7efd',
+        events: '688798900022cbda4ec0',
+        news: '68948a4b002d7cda6919',
+        sponsors: '68948b97003e5aa5068c',
+        info: '68945b4f000e7c3880cb',
+        toegankelijkheid: '6894d367002bf2645148',
+    }
+};
 
 // ========= Error Boundary Component =========
-// Vangt JavaScript-fouten op om een wit scherm te voorkomen.
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -37,14 +55,17 @@ class ErrorBoundary extends React.Component {
 }
 
 
-// Functie om datumstring te parsen naar een Date-object voor vergelijking en weergave
 const parseDateForSorting = (dateString) => {
   if (!dateString || typeof dateString !== 'string') return new Date(NaN);
   
+  const isoDate = new Date(dateString);
+  if (!isNaN(isoDate.getTime())) {
+    return isoDate;
+  }
+
   const trimmedDateString = dateString.trim();
   let day, month, year;
 
-  // Poging 1: "dd-mm-yyyy"
   let [d, m, y] = trimmedDateString.split('-');
   if (d && m && y && !isNaN(parseInt(m, 10))) {
     day = parseInt(d, 10);
@@ -60,7 +81,6 @@ const parseDateForSorting = (dateString) => {
     'november': 11, 'nov': 11, 'december': 12, 'dec': 12
   };
 
-  // Poging 2: "d maand yyyy"
   const parts = trimmedDateString.split(' ');
   if (parts.length === 3 && parts[1]) {
     day = parseInt(parts[0], 10);
@@ -71,17 +91,10 @@ const parseDateForSorting = (dateString) => {
     }
   }
 
-  // Poging 3: Fallback naar de native Date parser
-  const parsedDate = new Date(trimmedDateString);
-  if (!isNaN(parsedDate.getTime())) {
-      return parsedDate;
-  }
-
   return new Date(NaN);
 };
 
 
-// Vertalingen voor de app
 const translations = {
   nl: {
     common: {
@@ -190,7 +203,8 @@ const translations = {
       readableFont: 'Leesbaar lettertype',
       resetAccessibility: 'Reset',
       general: 'Algemeen',
-      footerText: 'Het Café Theater Festival wordt mede mogelijk gemaakt door haar partners en begunstigers:'
+      footerText: 'Het Café Theater Festival wordt mede mogelijk gemaakt door haar partners en begunstigers:',
+      back: 'Terug'
     },
     genres: {
         'Muziektheater': 'Muziektheater', 'Dans': 'Dans', 'Theater': 'Theater',
@@ -241,7 +255,8 @@ const translations = {
       diningFacility: 'Dining Facility',
       tooltipWheelchair: 'This location is wheelchair accessible and has a disabled toilet',
       tooltipChildren: 'This performance is suitable for children aged 8 and up',
-      tooltipDutch: 'This performance contains Dutch text', tooltipEnglish: 'This performance contains English text',
+      tooltipDutch: 'This performance contains Dutch text',
+      tooltipEnglish: 'This performance contains English text',
       tooltipDialogueFree: 'This performance contains no spoken text',
       tooltipDining: 'You can eat at this location',
       tooltipNGT: 'A Dutch Sign Language interpreter is present at this performance',
@@ -285,7 +300,8 @@ const translations = {
       readableFont: 'Readable Font',
       resetAccessibility: 'Reset',
       general: 'General',
-      footerText: 'The Café Theater Festival is made possible by its partners and benefactors:'
+      footerText: 'The Café Theater Festival is made possible by its partners and benefactors:',
+      back: 'Back'
     },
     genres: {
         'Muziektheater': 'Musical Theatre', 'Musical': 'Musical', 'Opera': 'Opera', 'Dans': 'Dance',
@@ -326,7 +342,6 @@ const getSafetyIcons = (translations, language) => [
 ];
 
 
-// Function to render privacy policy content with proper HTML structure
 const renderPrivacyPolicyContent = (content, textColorClass = 'text-gray-700') => {
   const lines = content.trim().split('\n');
   const elements = [];
@@ -346,17 +361,17 @@ const renderPrivacyPolicyContent = (content, textColorClass = 'text-gray-700') =
   lines.forEach((line, index) => {
     const trimmedLine = line.trim();
 
-    if (trimmedLine.match(/^\d+\.\s/)) { // Headings
+    if (trimmedLine.match(/^\d+\.\s/)) { 
       addCurrentList();
       elements.push(<h3 key={`h3-${index}`} className={`text-xl font-bold mb-2 ${textColorClass}`}>{trimmedLine}</h3>);
-    } else if (trimmedLine.startsWith('- ')) { // List items
+    } else if (trimmedLine.startsWith('- ')) { 
       const listItemContent = trimmedLine.substring(2).trim();
       currentList.push(
         <li key={`li-${index}`} dangerouslySetInnerHTML={{ __html: listItemContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
       );
-    } else if (trimmedLine === '') { // Empty line
+    } else if (trimmedLine === '') { 
       addCurrentList();
-    } else { // Paragraph
+    } else { 
       addCurrentList();
       elements.push(
         <p key={`p-${index}`} dangerouslySetInnerHTML={{ __html: trimmedLine.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} className={`mb-4 last:mb-0 ${textColorClass}`} />
@@ -369,7 +384,6 @@ const renderPrivacyPolicyContent = (content, textColorClass = 'text-gray-700') =
   return elements;
 };
 
-// New helper function for rendering generic text popups (Pay What You Can, Crowd Meter Info)
 const renderGenericPopupText = (content) => {
   const lines = content.trim().split('\n\n');
   const elements = lines.map((line, index) => (
@@ -379,10 +393,6 @@ const renderGenericPopupText = (content) => {
 };
 
 
-// ========= VERWIJDERD: Zwevende "Word Stamgast" knop (Nudge) =========
-
-
-// ========= NIEUW: Zwevende Toegankelijkheidsknop (Nudge) =========
 const AccessibilityNudge = ({ language, translations, accessibilitySettings, setAccessibilitySettings }) => {
     const [isOpen, setIsOpen] = useState(false);
     const nudgeRef = useRef(null);
@@ -472,7 +482,6 @@ const AccessibilityNudge = ({ language, translations, accessibilitySettings, set
 };
 
 
-// Component for the top-right controls that are always visible initially
 const TopRightControls = ({ language, handleLanguageChange, onReadPage, translations }) => (
     <div className="absolute top-12 right-4 z-10 flex flex-row items-center space-x-2">
         <button onClick={onReadPage} className="px-2 py-1 h-8 sm:h-10 rounded-full bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50 transition-colors duration-200 text-sm font-semibold flex items-center justify-center" aria-label={translations[language].common.readPage}>
@@ -485,15 +494,13 @@ const TopRightControls = ({ language, handleLanguageChange, onReadPage, translat
 );
 
 
-// Component voor de app-header (logo, titel, taalwisselaar, privacybeleid)
 const AppHeader = ({ titleRef, translations, language }) => (
   <div className="flex flex-col items-center w-full pt-12">
     <img src="https://cafetheaterfestival.nl/wp-content/uploads/2025/06/Logo_Web_Trans_Wit.png" alt="[Afbeelding van Café Theater Festival Logo]" className="w-full max-w-[10rem] h-auto mb-4"/>
   </div>
 );
 
-// Sticky Header component
-const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavoritesClick, handleFriendsFavoritesClick, handleMoreInfoClick, handleNewsClick, hasFriendsFavorites, selectedEvent, currentView, language, handleLanguageChange, translations, onLogoClick, onReadPage, openContentPopup }) => {
+const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavoritesClick, handleFriendsFavoritesClick, handleMoreInfoClick, hasFriendsFavorites, selectedEvent, currentView, language, handleLanguageChange, translations, onLogoClick, onReadPage, openContentPopup, isInitialLoad }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
     
@@ -501,7 +508,6 @@ const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavorit
     if (currentView === 'favorites') currentSelectionText = translations[language].common.favorites;
     else if (currentView === 'friends-favorites') currentSelectionText = translations[language].common.friendsFavorites;
     else if (currentView === 'more-info') currentSelectionText = translations[language].common.moreInfo;
-    else if (currentView === 'news') currentSelectionText = translations[language].common.news;
     else if (selectedEvent) currentSelectionText = selectedEvent;
 
     useEffect(() => {
@@ -517,14 +523,28 @@ const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavorit
             <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
                 <div className="relative flex h-24 sm:h-20 items-end justify-center bg-black/20 backdrop-blur-md rounded-b-xl px-4 shadow-lg pb-2">
                     <div className="absolute left-4 bottom-2 flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-4">
-                       <img onClick={onLogoClick} className="h-16 w-auto cursor-pointer" src="https://cafetheaterfestival.nl/wp-content/uploads/2025/06/fav-wit-1.png" alt="[Afbeelding van CTF Logo Favicon]"/>
-                       <button 
-                            onClick={() => openContentPopup('iframe', 'https://form.jotform.com/223333761374051')} 
-                            className="px-4 py-2 rounded-lg font-semibold bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50 transition-colors duration-200 text-sm"
-                        >
-                            <span className="hidden sm:inline">{translations[language].common.becomeRegularGuest}</span>
-                            <span className="sm:hidden">{translations[language].common.becomeRegularGuestShort}</span>
-                        </button>
+                       {isInitialLoad ? (
+                           <>
+                               <img onClick={onLogoClick} className="h-16 w-auto cursor-pointer" src="https://cafetheaterfestival.nl/wp-content/uploads/2025/06/fav-wit-1.png" alt="[Afbeelding van CTF Logo Favicon]"/>
+                               <button 
+                                    onClick={() => openContentPopup('iframe', 'https://form.jotform.com/223333761374051')} 
+                                    className="px-4 py-2 rounded-lg font-semibold bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50 transition-colors duration-200 text-sm"
+                                >
+                                    <span className="hidden sm:inline">{translations[language].common.becomeRegularGuest}</span>
+                                    <span className="sm:hidden">{translations[language].common.becomeRegularGuestShort}</span>
+                                </button>
+                           </>
+                       ) : (
+                           <button 
+                                onClick={onLogoClick}
+                                className="px-4 py-2 rounded-lg font-semibold bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50 transition-colors duration-200 text-sm flex items-center gap-2"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                                {translations[language].common.back}
+                           </button>
+                       )}
                     </div>
                     <div className="flex items-center justify-center">
                         <div className="relative" ref={dropdownRef}>
@@ -541,7 +561,6 @@ const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavorit
                                         {hasFriendsFavorites && <a href="#" onClick={(e) => { e.preventDefault(); handleFriendsFavoritesClick(); setIsDropdownOpen(false); }} className="block px-4 py-2 text-sm text-white hover:bg-[#20747f] text-center" role="menuitem">{translations[language].common.friendsFavorites}</a>}
                                         <div className="border-t border-white/20 my-1"></div>
                                         <a href="#" onClick={(e) => { e.preventDefault(); handleMoreInfoClick(); setIsDropdownOpen(false); }} className="block px-4 py-2 text-sm text-white hover:bg-[#20747f] text-center" role="menuitem">{translations[language].common.moreInfo}</a>
-                                        <a href="#" onClick={(e) => { e.preventDefault(); handleNewsClick(); setIsDropdownOpen(false); }} className="block px-4 py-2 text-sm text-white hover:bg-[#20747f] text-center" role="menuitem">{translations[language].common.news}</a>
                                     </div>
                                 </div>
                             )}
@@ -560,8 +579,7 @@ const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavorit
 };
 
 
-// ========= BIJGEWERKT: Component voor de evenementnavigatiebalk op het startscherm =========
-const EventNavigation = ({ onEventSelect, onFavoritesSelect, onFriendsFavoritesSelect, onMoreInfoSelect, onNewsSelect, hasFriendsFavorites, uniqueEvents, language, translations }) => {
+const EventNavigation = ({ onEventSelect, onFavoritesSelect, onFriendsFavoritesSelect, onMoreInfoSelect, hasFriendsFavorites, uniqueEvents, language, translations }) => {
     const eventButtons = uniqueEvents.map(event => (
         <button key={event} onClick={() => onEventSelect(event)} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{event}</button>
     ));
@@ -571,7 +589,6 @@ const EventNavigation = ({ onEventSelect, onFavoritesSelect, onFriendsFavoritesS
             <button onClick={onFavoritesSelect} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{translations[language].common.favorites}</button>
             {hasFriendsFavorites && <button onClick={onFriendsFavoritesSelect} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{translations[language].common.friendsFavorites}</button>}
             <button onClick={onMoreInfoSelect} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{translations[language].common.moreInfo}</button>
-            <button onClick={onNewsSelect} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{translations[language].common.news}</button>
         </>
     );
 
@@ -587,7 +604,6 @@ const EventNavigation = ({ onEventSelect, onFavoritesSelect, onFriendsFavoritesS
     );
 };
 
-// Component voor de datumnavigatiebalk
 const DateNavigation = ({ datesForCurrentSelectedEvent, selectedDate, setSelectedDate, setSearchTerm, translations, language, selectedEvent, timetableData }) => {
     const hasCalmRoutePerformances = useMemo(() => 
         timetableData.some(item => item.event === selectedEvent && item.isCalmRoute),
@@ -603,7 +619,6 @@ const DateNavigation = ({ datesForCurrentSelectedEvent, selectedDate, setSelecte
     );
 };
 
-// SponsorDisplay component
 const SponsorDisplay = React.forwardRef(({ sponsorInfo, language, translations }, ref) => {
     if (!sponsorInfo || !sponsorInfo.logoUrl) return <div ref={ref} className="h-12"></div>;
 
@@ -615,14 +630,12 @@ const SponsorDisplay = React.forwardRef(({ sponsorInfo, language, translations }
     );
 });
 
-// Zoekbalk
 const SearchBar = ({ searchTerm, setSearchTerm, translations, language }) => (
-  <div className="w-full max-w-md mb-4 px-4 mx-auto">
+  <div className="w-full max-w-md mx-auto">
     <input type="text" placeholder={translations[language].common.searchPlaceholder} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full p-3 rounded-lg border-2 border-gray-300 focus:border-[#1a5b64] focus:ring focus:ring-[#1a5b64] focus:ring-opacity-50 text-gray-800 shadow-md"/>
   </div>
 );
 
-// Genre Filter Dropdown Component
 const GenreFilterDropdown = ({
   genreFilters,
   setGenreFilters,
@@ -702,7 +715,6 @@ const GenreFilterDropdown = ({
 };
 
 
-// Icon Filter Dropdown Component
 const IconFilterDropdown = ({
   iconFilters,
   setIconFilters,
@@ -794,7 +806,6 @@ const IconFilterDropdown = ({
 };
 
 
-// Component voor de view switcher (Card vs Block)
 const EventViewSwitcher = ({ viewMode, setViewMode, language, translations, handleAnimatedUpdate }) => (
   <div className="flex justify-center gap-4 my-8">
     <button
@@ -812,8 +823,114 @@ const EventViewSwitcher = ({ viewMode, setViewMode, language, translations, hand
   </div>
 );
 
+const SearchFilterNudges = ({
+    searchTerm,
+    setSearchTerm,
+    genreFilters,
+    setGenreFilters,
+    allGenres,
+    iconFilters,
+    setIconFilters,
+    filterScope,
+    setFilterScope,
+    safetyIcons,
+    language,
+    translations
+}) => {
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const nudgeRef = useRef(null);
 
-// Voorstellingskaart
+    const toggleSearch = () => {
+        setIsSearchOpen(prev => !prev);
+        if (isFilterOpen) setIsFilterOpen(false);
+    };
+
+    const toggleFilter = () => {
+        setIsFilterOpen(prev => !prev);
+        if (isSearchOpen) setIsSearchOpen(false);
+    };
+    
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (nudgeRef.current && !nudgeRef.current.contains(event.target)) {
+                setIsSearchOpen(false);
+                setIsFilterOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const SearchIcon = () => (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+    );
+
+    const FilterIcon = () => (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+        </svg>
+    );
+
+    return (
+        <div
+            ref={nudgeRef}
+            className="fixed top-1/2 left-0 transform -translate-y-1/2 z-50 flex items-center pointer-events-none"
+        >
+            <div className="pointer-events-auto">
+                <div className={`bg-[#1a5b64] rounded-r-lg shadow-xl p-4 text-white w-80 transition-all duration-300 ease-in-out ${isSearchOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
+                    <h3 className="font-bold text-lg mb-4">{translations[language].common.searchPlaceholder.split('...')[0]}</h3>
+                    <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} translations={translations} language={language} />
+                </div>
+
+                 <div className={`bg-[#1a5b64] rounded-r-lg shadow-xl p-4 text-white w-80 transition-all duration-300 ease-in-out absolute top-0 ${isFilterOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
+                    <h3 className="font-bold text-lg mb-4">{translations[language].common.filterByIcon.split('...')[0]}</h3>
+                    <div className="space-y-4 relative">
+                        <GenreFilterDropdown
+                             genreFilters={genreFilters}
+                             setGenreFilters={setGenreFilters}
+                             allGenres={allGenres}
+                             language={language}
+                             translations={translations}
+                        />
+                        <IconFilterDropdown
+                            iconFilters={iconFilters}
+                            setIconFilters={setIconFilters}
+                            filterScope={filterScope}
+                            setFilterScope={setFilterScope}
+                            safetyIcons={safetyIcons}
+                            language={language}
+                            translations={translations}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex flex-col space-y-2 ml-2 pointer-events-auto">
+                 <button
+                    onClick={toggleSearch}
+                    className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-colors focus:outline-none ${isSearchOpen ? 'bg-[#20747f]' : 'bg-[#2e9aaa] hover:bg-[#20747f]'}`}
+                    aria-label="Zoeken"
+                    aria-expanded={isSearchOpen}
+                >
+                    <SearchIcon />
+                </button>
+                 <button
+                    onClick={toggleFilter}
+                    className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-colors focus:outline-none ${isFilterOpen ? 'bg-[#20747f]' : 'bg-[#2e9aaa] hover:bg-[#20747f]'}`}
+                    aria-label="Filteren"
+                    aria-expanded={isFilterOpen}
+                >
+                    <FilterIcon />
+                </button>
+            </div>
+        </div>
+    );
+};
+
+
 const PerformanceCard = ({ item, favorites, toggleFavorite, addToGoogleCalendar, openContentPopup, language, handleIconMouseEnter, handleIconMouseLeave, translations, showMessageBox, safetyIcons, hideTime = false, isExportMode = false, isFriendsView = false, speak }) => {
     const getCrowdLevelInfo = useCallback((level) => {
         const defaultInfo = { fullBar: false, position: '10%', tooltip: translations[language].common.tooltipCrowdLevelGreenFull, label: null, barClass: 'bg-gradient-to-r from-green-600 via-yellow-500 to-red-600' };
@@ -981,7 +1098,6 @@ const PerformanceCard = ({ item, favorites, toggleFavorite, addToGoogleCalendar,
 };
 
 
-// Component voor het weergeven van de dienstregeling of favorieten
 const TimetableDisplay = React.forwardRef(({
   loading, error, displayedData, currentView, favorites, toggleFavorite,
   addToGoogleCalendar, openContentPopup, language, handleIconMouseEnter, handleIconMouseLeave, translations,
@@ -1088,7 +1204,6 @@ const TimetableDisplay = React.forwardRef(({
 });
 
 
-// Vereenvoudigd Blokkenschema component
 const BlockTimetable = React.forwardRef(({ allData, favorites, toggleFavorite, selectedEvent, openContentPopup, translations, language, isFavoritesView = false, isFriendsView = false, friendsFavorites = new Set(), isExportMode = false }, ref) => {
     const [selectedDay, setSelectedDay] = useState(null);
 
@@ -1274,7 +1389,6 @@ const BlockTimetable = React.forwardRef(({ allData, favorites, toggleFavorite, s
 });
 
 
-// Component voor een inzoombare afbeelding
 const ZoomableImage = ({ src, alt }) => {
     const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
     const imageRef = useRef(null);
@@ -1397,7 +1511,6 @@ const ZoomableImage = ({ src, alt }) => {
 };
 
 
-// Component voor de algemene pop-up
 const PopupModal = ({ showPopup, closePopup, popupContent, language, translations, speak }) => {
   if (!showPopup) return null;
 
@@ -1489,7 +1602,6 @@ const PopupModal = ({ showPopup, closePopup, popupContent, language, translation
   );
 };
 
-// Component voor de privacybeleid pop-up
 const PrivacyPolicyModal = ({ showPrivacyPolicy, setShowPrivacyPolicy, language, renderPrivacyPolicyContent, translations, speak }) => {
   if (!showPrivacyPolicy) return null;
 
@@ -1516,7 +1628,6 @@ const PrivacyPolicyModal = ({ showPrivacyPolicy, setShowPrivacyPolicy, language,
   );
 };
 
-// Component voor de custom tooltip
 const CustomTooltip = ({ showCustomTooltip, customTooltipContent, customTooltipPosition }) => {
   if (!showCustomTooltip) return null;
 
@@ -1527,7 +1638,6 @@ const CustomTooltip = ({ showCustomTooltip, customTooltipContent, customTooltipP
   );
 };
 
-// Component voor een custom message box (ter vervanging van alert())
 const MessageBox = ({ show, title, message, buttons }) => {
   if (!show) return null;
 
@@ -1552,7 +1662,6 @@ const MessageBox = ({ show, title, message, buttons }) => {
   );
 };
 
-// ExportModal toont de afbeeldingsoptie nu conditioneel.
 const ExportModal = ({ show, onClose, onExport, language, translations, isExporting, showImageExportOption }) => {
     
     if (!show) return null;
@@ -1589,7 +1698,6 @@ const ExportModal = ({ show, onClose, onExport, language, translations, isExport
     );
 };
 
-// Import Favorites Modal
 const ImportFavoritesModal = ({ show, onClose, onImport, performances, language, translations }) => {
     if (!show || !performances || performances.length === 0) return null;
 
@@ -1620,7 +1728,6 @@ const ImportFavoritesModal = ({ show, onClose, onImport, performances, language,
     );
 };
 
-// Offline Indicator Component
 const OfflineIndicator = ({ isOffline, language, translations, onRetry }) => {
   if (!isOffline) return null;
   return (
@@ -1633,9 +1740,7 @@ const OfflineIndicator = ({ isOffline, language, translations, onRetry }) => {
   );
 };
 
-// ========= BIJGEWERKT: Meer Info Pagina met Categorieën =========
 const MoreInfoPage = ({ generalInfoItems, accessibilityInfoItems, openContentPopup, language, translations }) => {
-  // Functie om een sectie te renderen, nu met een optie om de titel te tonen
   const renderInfoSection = (title, items, showTitle = true) => {
     if (!items || items.length === 0) return null;
     return (
@@ -1682,27 +1787,22 @@ const MoreInfoPage = ({ generalInfoItems, accessibilityInfoItems, openContentPop
 
   return (
     <div className="w-full max-w-6xl mx-auto pt-20">
-      {/* Sectie 'Algemeen' wordt nu zonder titel gerenderd */}
       {renderInfoSection(translations[language].common.general, generalInfoItems, false)}
-      {/* Sectie 'Toegankelijkheid' wordt met titel gerenderd */}
       {renderInfoSection(translations[language].common.accessibility, accessibilityInfoItems, true)}
     </div>
   );
 };
 
 
-// ========= BIJGEWERKT: Nieuws Pagina =========
+// ========= WIJZIGING: Nieuwsitems zijn nu kleiner =========
 const NewsPage = ({ newsItems, openContentPopup, language, translations }) => {
   if (!newsItems || newsItems.length === 0) {
-    return (
-      <div className="text-center text-white p-4 bg-white bg-opacity-20 rounded-xl shadow-lg">
-        Geen nieuws beschikbaar.
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto pt-20">
+    <div className="w-full max-w-6xl mx-auto py-16 px-4">
+      <h2 className="text-3xl font-bold text-white mb-8 text-center drop_shadow-lg">{translations[language].common.news}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
         {newsItems.map((item, index) => {
           const itemTitle = item.title[language] || item.title.nl;
@@ -1712,7 +1812,8 @@ const NewsPage = ({ newsItems, openContentPopup, language, translations }) => {
           return (
             <div
               key={index}
-              className="bg-white rounded-xl shadow-xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full md:w-[384px]"
+              // De breedte is hier aangepast van md:w-[384px] naar md:w-[340px]
+              className="bg-white rounded-xl shadow-xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full md:w-[340px]"
               onClick={() => openContentPopup('iframe', itemUrl)}
             >
               <img
@@ -1732,30 +1833,42 @@ const NewsPage = ({ newsItems, openContentPopup, language, translations }) => {
   );
 };
 
+const ScrollDownButton = ({ onClick, translations, language }) => (
+    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20">
+        <button
+            onClick={onClick}
+            className="animate-bounce bg-black/30 p-2 w-20 h-20 ring-1 ring-white/30 backdrop-blur-md rounded-full text-white flex items-center justify-center shadow-lg"
+            aria-label={translations[language].common.news}
+        >
+            <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" transform="rotate(180 10 10)" />
+            </svg>
+        </button>
+    </div>
+);
 
-// ========= BIJGEWERKT: Footer Component met Logo Slider =========
+
+// ========= WIJZIGING: Logo's terug naar oorspronkelijke grootte =========
 const AppFooter = ({ logos, language, translations }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const containerRef = useRef(null);
     const intervalRef = useRef(null);
     const timeoutRef = useRef(null);
 
-    // Dupliceer de logo's voor een naadloze, oneindige loop
     const extendedLogos = useMemo(() => {
-        if (!logos || logos.length < 6) return logos || []; // Geen loop als er te weinig logo's zijn
-        return [...logos, ...logos]; // Eén keer dupliceren is genoeg
+        if (!logos || logos.length < 6) return logos || [];
+        return [...logos, ...logos];
     }, [logos]);
 
     useEffect(() => {
-        // Stop en wis vorige intervals/timeouts
         clearInterval(intervalRef.current);
         clearTimeout(timeoutRef.current);
 
-        if (!logos || logos.length < 6) return; // Geen animatie starten
+        if (!logos || logos.length < 6) return;
 
         intervalRef.current = setInterval(() => {
             setCurrentIndex(prev => prev + 6);
-        }, 20000); // 20 seconden
+        }, 20000);
 
         return () => {
             clearInterval(intervalRef.current);
@@ -1780,7 +1893,6 @@ const AppFooter = ({ logos, language, translations }) => {
         container.style.transition = 'transform 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
         container.style.transform = `translateX(-${scrollAmount}px)`;
 
-        // Als de huidige index de originele lijst overschrijdt, plannen we een reset
         if (currentIndex >= logos.length) {
             timeoutRef.current = setTimeout(() => {
                 const newIndex = currentIndex % logos.length;
@@ -1788,12 +1900,11 @@ const AppFooter = ({ logos, language, translations }) => {
                 const newScrollAmount = newIndex * itemWidth;
                 container.style.transform = `translateX(-${newScrollAmount}px)`;
                 
-                // Wacht tot de transform is toegepast, update dan de state
                 requestAnimationFrame(() => {
                     setCurrentIndex(newIndex);
                 });
 
-            }, 1500); // Moet gelijk zijn aan de transitieduur
+            }, 1500);
         }
 
     }, [currentIndex, logos, extendedLogos.length]);
@@ -1810,11 +1921,12 @@ const AppFooter = ({ logos, language, translations }) => {
                 <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#20747f] via-transparent to-[#20747f] z-10 pointer-events-none"></div>
                 <div className="flex" ref={containerRef}>
                     {extendedLogos.map((logo, index) => (
-                        <div key={index} className="group relative flex-shrink-0 h-24 w-40 flex items-center justify-center mx-8">
+                        // De breedte en marge zijn hier teruggezet naar een grotere waarde
+                        <div key={index} className="group relative flex-shrink-0 h-20 w-48 flex items-center justify-center mx-8">
                             <img 
                                 src={logo.url} 
                                 alt={`[Afbeelding van Begunstiger logo ${logo.name}]`}
-                                className="max-h-12 w-auto object-contain transition-transform duration-300 ease-in-out group-hover:scale-125 group-hover:-translate-y-3" 
+                                className="max-h-16 w-auto object-contain transition-transform duration-300 ease-in-out group-hover:scale-125 group-hover:-translate-y-3" 
                                 onError={(e) => { e.target.style.display = 'none'; }}
                             />
                             <div className="absolute bottom-full mb-2 w-max px-3 py-1 bg-gray-800 bg-opacity-80 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out pointer-events-none z-20">
@@ -1827,7 +1939,6 @@ const AppFooter = ({ logos, language, translations }) => {
         </footer>
     );
 };
-
 
 // De hoofdcomponent van de app
 const AppContent = () => {
@@ -1877,7 +1988,8 @@ const AppContent = () => {
   const [accessibilityInfoData, setAccessibilityInfoData] = useState([]);
   const [newsData, setNewsData] = useState([]);
   const [benefactorLogos, setBenefactorLogos] = useState([]);
-
+  
+  const newsSectionRef = useRef(null);
   const titleRef = useRef(null);
   const sponsorRef = useRef(null);
   const notificationTimeouts = useRef({});
@@ -2077,7 +2189,6 @@ const AppContent = () => {
     }
   }, []);
 
-  // BIJGEWERKT: Voorleesfunctie voor correcte content op info/nieuws pagina's
   const handleReadPage = useCallback(() => {
     let textToSpeak = '';
     
@@ -2271,54 +2382,50 @@ const AppContent = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-        if (titleRef.current) {
-            const { bottom } = titleRef.current.getBoundingClientRect();
-            setShowStickyHeader(bottom < 80);
+        if (isInitialLoad) {
+            setShowStickyHeader(window.scrollY > 50);
+        } else {
+            setShowStickyHeader(true);
         }
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isInitialLoad]);
 
   const returnToInitialView = useCallback(() => {
-      setCurrentView('timetable'); // Reset de view naar de standaard
-      setIsInitialLoad(true);
-      setSelectedEvent(null);
-      setSelectedDate(null);
-      setSearchTerm('');
-      setShowStickyHeader(false);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      try {
-        window.history.replaceState({ view: 'initial' }, '', window.location.pathname + '#');
-      } catch (e) {
-        console.warn("Could not update history state:", e);
-      }
-  }, []);
+      handleAnimatedUpdate(() => {
+        setCurrentView('timetable');
+        setIsInitialLoad(true);
+        setSelectedEvent(null);
+        setSelectedDate(null);
+        setSearchTerm('');
+        setShowStickyHeader(false);
+        try {
+          window.history.pushState({ view: 'initial' }, '', window.location.pathname + '#');
+        } catch (e) {
+          console.warn("Could not update history state:", e);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+  }, [handleAnimatedUpdate]);
   
   const handleViewChange = useCallback((view, event = null) => {
-    setIsTransitioning(true);
-    
-    const updateUrl = () => {
+    handleAnimatedUpdate(() => {
         let hash = '#';
         if (view === 'timetable' && event) hash = `#${encodeURIComponent(event)}`;
         else if (view === 'favorites') hash = '#favorites';
         else if (view === 'friends-favorites') hash = '#friends-favorites';
         else if (view === 'more-info') hash = '#more-info';
-        else if (view === 'news') hash = '#news';
 
         const newUrl = window.location.pathname + hash;
         const state = { view: 'detail', event, viewMode: 'card', currentView: view };
 
         try {
-            window.history.replaceState(state, '', newUrl);
+            window.history.pushState(state, '', newUrl);
         } catch (e) {
             console.warn("Could not update history state:", e);
         }
-    };
-    
-    updateUrl();
 
-    setTimeout(() => {
         setCurrentView(view);
         setSelectedEvent(event);
         if (view === 'timetable') setEventViewMode('card');
@@ -2333,24 +2440,13 @@ const AppContent = () => {
             setSelectedDate('favorites-view');
         } else if (view === 'friends-favorites') {
             setSelectedDate('friends-favorites-view');
-        } else if (view === 'more-info' || view === 'news') {
+        } else if (view === 'more-info') {
             setSelectedDate(null);
         }
         
-        requestAnimationFrame(() => {
-             if (sponsorRef.current) {
-                const headerEl = document.querySelector('.fixed.top-0');
-                const headerHeight = headerEl ? headerEl.offsetHeight : 80;
-                const elementTop = sponsorRef.current.getBoundingClientRect().top + window.scrollY;
-                window.scrollTo({ top: elementTop - headerHeight - 10, behavior: 'auto' });
-             } else {
-                 window.scrollTo({ top: 0, behavior: 'auto'});
-             }
-             setIsTransitioning(false);
-        });
-
-    }, 300);
-  }, [timetableData]);
+        window.scrollTo({ top: 0, behavior: 'auto'});
+    });
+  }, [timetableData, handleAnimatedUpdate]);
 
   const handleClearFriendsFavorites = useCallback(() => {
       setFriendsFavorites(new Set());
@@ -2366,46 +2462,25 @@ const AppContent = () => {
   useEffect(() => {
       const handlePopState = (event) => {
           const state = event.state;
-          if (!state || state.view === 'initial') {
+          if (!state || state.view === 'initial' || !window.location.hash) {
               returnToInitialView();
           } else if (state.view === 'detail') {
-              setIsInitialLoad(false);
-              setCurrentView(state.currentView || 'timetable');
-              setSelectedEvent(state.event);
-              if(state.currentView === 'timetable') setEventViewMode(state.viewMode || 'card');
-              setShowStickyHeader(true);
+              handleAnimatedUpdate(() => {
+                setIsInitialLoad(false);
+                setCurrentView(state.currentView || 'timetable');
+                setSelectedEvent(state.event);
+                if(state.currentView === 'timetable') setEventViewMode(state.viewMode || 'card');
+                setShowStickyHeader(true);
+              });
           }
       };
 
       window.addEventListener('popstate', handlePopState);
       
-      const processUrl = () => {
-        const hash = window.location.hash.substring(1);
-        
-        if (hash === 'favorites') {
-            handleViewChange('favorites');
-        } else if (hash === 'friends-favorites') {
-            handleViewChange('friends-favorites');
-        } else if (hash === 'more-info') {
-            handleViewChange('more-info');
-        } else if (hash === 'news') {
-            handleViewChange('news');
-        } else if (hash) {
-            handleViewChange('timetable', decodeURIComponent(hash));
-        } else {
-            try {
-                window.history.replaceState({ view: 'initial' }, '', window.location.pathname + '#');
-            } catch (e) {
-                console.warn("Could not update history state:", e);
-            }
-        }
-      };
-      
       return () => {
           window.removeEventListener('popstate', handlePopState);
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [returnToInitialView, handleAnimatedUpdate]);
 
   const openContentPopup = useCallback((type, data) => {
     let finalData = data;
@@ -2467,36 +2542,39 @@ const AppContent = () => {
 
   useEffect(() => {
     try {
-      const storedFavorites = JSON.parse(localStorage.getItem('ctfTimetableFavorites'));
-      if (storedFavorites) setFavorites(new Set(storedFavorites));
+      const storedFavorites = localStorage.getItem('ctfTimetableFavorites');
+      if (storedFavorites) setFavorites(new Set(JSON.parse(storedFavorites)));
 
-      const storedFriendsFavorites = JSON.parse(localStorage.getItem('ctfFriendsFavorites'));
-      if (storedFriendsFavorites) setFriendsFavorites(new Set(storedFriendsFavorites));
+      const storedFriendsFavorites = localStorage.getItem('ctfFriendsFavorites');
+      if (storedFriendsFavorites) setFriendsFavorites(new Set(JSON.parse(storedFriendsFavorites)));
       
-      const storedGeneralInfo = JSON.parse(localStorage.getItem('ctfGeneralInfoCache'));
-      if (storedGeneralInfo) setGeneralInfoData(storedGeneralInfo);
+      const storedGeneralInfo = localStorage.getItem('ctfGeneralInfoCache');
+      if (storedGeneralInfo) setGeneralInfoData(JSON.parse(storedGeneralInfo));
 
-      const storedAccessibilityInfo = JSON.parse(localStorage.getItem('ctfAccessibilityInfoCache'));
-      if (storedAccessibilityInfo) setAccessibilityInfoData(storedAccessibilityInfo);
+      const storedAccessibilityInfo = localStorage.getItem('ctfAccessibilityInfoCache');
+      if (storedAccessibilityInfo) setAccessibilityInfoData(JSON.parse(storedAccessibilityInfo));
       
-      const storedNews = JSON.parse(localStorage.getItem('ctfNewsCache'));
+      const storedNews = localStorage.getItem('ctfNewsCache');
       if (storedNews) setNewsData(JSON.parse(storedNews));
 
-      const storedBenefactorLogos = JSON.parse(localStorage.getItem('ctfBenefactorLogosCache'));
-      if (storedBenefactorLogos) setBenefactorLogos(storedBenefactorLogos);
+      const storedBenefactorLogos = localStorage.getItem('ctfBenefactorLogosCache');
+      if (storedBenefactorLogos) setBenefactorLogos(JSON.parse(storedBenefactorLogos));
 
-      const storedCustomNotifs = JSON.parse(localStorage.getItem('ctfScheduledCustomNotifications'));
-       if (storedCustomNotifs) setScheduledCustomNotifications(new Set(storedCustomNotifs));
+      const storedCustomNotifs = localStorage.getItem('ctfScheduledCustomNotifications');
+      if (storedCustomNotifs) setScheduledCustomNotifications(new Set(JSON.parse(storedCustomNotifs)));
        
       const dismissed = localStorage.getItem('ctfNotificationPermissionDismissed');
       if (dismissed === 'true') setPermissionRequestDismissed(true);
       
-      const storedAccessSettings = JSON.parse(localStorage.getItem('ctfAccessibilitySettings'));
+      const storedAccessSettings = localStorage.getItem('ctfAccessibilitySettings');
       if (storedAccessSettings) {
-        setAccessibilitySettings(prev => ({...prev, ...storedAccessSettings}));
+        setAccessibilitySettings(prev => ({...prev, ...JSON.parse(storedAccessSettings)}));
       }
 
-    } catch (e) { console.error("Fout bij laden uit localStorage:", e); }
+    } catch (e) { 
+        console.error("Fout bij laden uit localStorage, cache wordt gewist:", e); 
+        localStorage.clear();
+    }
   }, []);
 
   useEffect(() => { localStorage.setItem('appLanguage', language); }, [language]);
@@ -2532,172 +2610,173 @@ const AppContent = () => {
 
   const handleLanguageChange = () => setLanguage(prev => prev === 'nl' ? 'en' : 'nl');
 
-  const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ29eV10b3lVQf0il_Y72UE8Lp5arT_ks1GC4D7ulysK08nrivnsmcecP7JA7zu2_jEvqqzOairWmc6/pub?output=csv';
-  const gistNotificationsUrl = 'https://ldegroen.github.io/ctf-notificaties/notifications.json'; 
-
-  const parseCsvLine = (line) => {
-    const cells = []; let inQuote = false; let currentCell = '';
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      if (char === '"' && (i === 0 || line[i - 1] !== '\\')) inQuote = !inQuote;
-      else if (char === ',' && !inQuote) { cells.push(currentCell.replace(/""/g, '"').trim()); currentCell = ''; } 
-      else currentCell += char;
-    }
-    cells.push(currentCell.replace(/""/g, '"').trim());
-    return cells;
-  };
-
-  // BIJGEWERKT: Data ophalen met nieuwe kolomindeling voor vertalingen en begunstigers
-  const fetchTimetableData = useCallback(async () => {
+  const fetchDataFromAppwrite = useCallback(async () => {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
 
     try {
-        const response = await fetch(googleSheetUrl, { signal: controller.signal, cache: "no-store" });
+        const client = new Client().setEndpoint(APPWRITE_CONFIG.endpoint).setProject(APPWRITE_CONFIG.projectId);
+        const databases = new Databases(client);
+
+        const fetchAllDocuments = async (collectionId) => {
+            let documents = [];
+            let response;
+            let offset = 0;
+            const limit = 100;
+            do {
+                response = await databases.listDocuments(APPWRITE_CONFIG.databaseId, collectionId, [Query.limit(limit), Query.offset(offset)]);
+                documents.push(...response.documents);
+                offset += limit;
+            } while (documents.length < response.total);
+            return documents;
+        };
+
+        const [
+            companies, performances, locations, executions,
+            eventsData, sponsors, news, info, accessibility
+        ] = await Promise.all([
+            fetchAllDocuments(APPWRITE_CONFIG.collections.companies),
+            fetchAllDocuments(APPWRITE_CONFIG.collections.performances),
+            fetchAllDocuments(APPWRITE_CONFIG.collections.locations),
+            fetchAllDocuments(APPWRITE_CONFIG.collections.executions),
+            fetchAllDocuments(APPWRITE_CONFIG.collections.events),
+            fetchAllDocuments(APPWRITE_CONFIG.collections.sponsors),
+            fetchAllDocuments(APPWRITE_CONFIG.collections.news),
+            fetchAllDocuments(APPWRITE_CONFIG.collections.info),
+            fetchAllDocuments(APPWRITE_CONFIG.collections.toegankelijkheid)
+        ]);
         clearTimeout(timeoutId);
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const csvText = await response.text();
+        const companiesMap = new Map(companies.map(c => [c.$id, c]));
+        const performancesMap = new Map(performances.map(p => [p.$id, p]));
+        const locationsMap = new Map(locations.map(l => [l.$id, l]));
+        const executionsMap = new Map(executions.map(e => [e.$id, e]));
 
-        const lines = csvText.split(/\r?\n/).slice(1).filter(line => line.trim() !== '');
-        let allParsedData = [];
         const localEventInfoMap = {};
-        const tempGeneralInfoItems = [];
-        const tempAccessibilityInfoItems = [];
-        const tempNewsItems = [];
-        const tempBenefactorLogos = new Map();
+        let allParsedData = [];
 
-        for (let i = 0; i < lines.length; i++) {
-            const cells = parseCsvLine(lines[i]);
-            if (cells.length < 44) continue;
+        for (const eventDoc of eventsData) {
+            localEventInfoMap[eventDoc.Name] = { 
+                mapUrl: eventDoc.mapUrl,
+                sponsorLogo: eventDoc.sponsorLogoUrl,
+                dateString: null, 
+            };
 
-            const [
-                // Bestaande performance kolommen (0-22)
-                crowd, date, time, artist, title, genre, url, artistImageUrl, 
-                event, sponsorLogoUrl, pwycLink, location, googleMapsUrl, 
-                mapNumber, mapImageUrl, wheelchair, children, dutch, english, 
-                dialogue, dining, ngt, calm,
+            if (!eventDoc.executionIds || eventDoc.executionIds.length === 0) continue;
+
+            for (const execId of eventDoc.executionIds) {
+                const execution = executionsMap.get(execId);
+                if (!execution) continue;
+
+                const performance = performancesMap.get(execution.performanceId);
+                if (!performance) continue;
                 
-                // Kolom X voor begunstigers (23)
-                benefactorLogoUrl,
-                benefactorName, // Kolom Y
-                _unused_z,
-                
-                // Nieuwe kolommen voor Meer Info & Nieuws (26-43)
-                generalInfoTitleNL, generalInfoUrlNL, generalInfoImageUrlNL,
-                generalInfoTitleEN, generalInfoUrlEN, generalInfoImageUrlEN,
-                
-                accessibilityTitleNL, accessibilityUrlNL, accessibilityImageUrlNL,
-                accessibilityTitleEN, accessibilityUrlEN, accessibilityImageUrlEN,
+                const company = companiesMap.get(performance.companyId);
+                const locationData = locationsMap.get(execution.locationId);
+                if (!locationData) continue;
 
-                newsTitleNL, newsUrlNL, newsImageUrlNL,
-                newsTitleEN, newsUrlEN, newsImageUrlEN
-            ] = cells.map(cell => cell || '');
 
-            if (event) {
-                if (!localEventInfoMap[event]) localEventInfoMap[event] = {};
-                const itemDate = parseDateForSorting(date);
-                if (!isNaN(itemDate.getTime())) {
-                    if (!localEventInfoMap[event].dateString || itemDate < parseDateForSorting(localEventInfoMap[event].dateString)) {
-                        localEventInfoMap[event].dateString = date;
-                    }
+                const dateTime = new Date(execution.DateTime);
+                if (isNaN(dateTime.getTime())) continue;
+                
+                const eventDate = dateTime.toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const eventTime = dateTime.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+
+                const eventStartDate = parseDateForSorting(localEventInfoMap[eventDoc.Name].dateString);
+                if (!eventStartDate || dateTime < eventStartDate) {
+                    localEventInfoMap[eventDoc.Name].dateString = eventDate;
                 }
-                if (mapImageUrl && !localEventInfoMap[event].mapUrl) localEventInfoMap[event].mapUrl = mapImageUrl;
-                if (sponsorLogoUrl && !localEventInfoMap[event].sponsorLogo) localEventInfoMap[event].sponsorLogo = sponsorLogoUrl;
-            }
 
-            if (benefactorLogoUrl) {
-                tempBenefactorLogos.set(benefactorLogoUrl, benefactorName || '');
-            }
-
-            if (artist || title) {
                 allParsedData.push({
-                    id: `${event}-${date}-${time}-${artist}-${title}`,
-                    date, time, artist, title, location, url, event,
-                    googleMapsUrl, pwycLink, mapNumber, mapImageUrl, genre, isCalmRoute: calm.toLowerCase() === 'x',
-                    crowdLevel: crowd,
-                    artistImageUrl,
+                    id: execution.$id,
+                    date: eventDate,
+                    time: eventTime,
+                    artist: company?.Name || 'Onbekend',
+                    title: performance.Title || 'Onbekend',
+                    location: locationData.Name || 'Onbekende Locatie',
+                    url: performance.meerInfoUrl || '',
+                    event: eventDoc.Name,
+                    googleMapsUrl: locationData.googleMapsUrl || '',
+                    pwycLink: performance.pwycLink || '',
+                    mapNumber: locationData.locationNumber || 'N/A',
+                    mapImageUrl: eventDoc.mapUrl || '',
+                    genre: performance.genre || 'N/A',
+                    isCalmRoute: execution.quietRoute || false,
+                    crowdLevel: execution.expectedCrowd || '',
+                    artistImageUrl: performance.imageUrl || '',
                     safetyInfo: {
-                        wheelchairAccessible: wheelchair.toLowerCase() === 'x',
-                        suitableForChildren: children.toLowerCase() === 'x',
-                        dutchLanguage: dutch.toLowerCase() === 'x',
-                        englishLanguage: english.toLowerCase() === 'x',
-                        dialogueFree: dialogue.toLowerCase() === 'x',
-                        diningFacility: dining.toLowerCase() === 'x',
-                        hasNGT: ngt.toLowerCase() === 'x',
+                        wheelchairAccessible: locationData.isWheelchairAccessible || false,
+                        suitableForChildren: performance.isChildFriendly || false,
+                        dutchLanguage: performance.isDutchLanguage || false,
+                        englishLanguage: !performance.isDutchLanguage,
+                        dialogueFree: performance.isDialogueFree || false,
+                        diningFacility: locationData.hasDining || false,
+                        hasNGT: execution.hasNgt || false,
                     },
-                });
-            }
-            
-            if (generalInfoTitleNL || generalInfoTitleEN) {
-                tempGeneralInfoItems.push({
-                    title: { nl: generalInfoTitleNL, en: generalInfoTitleEN },
-                    url: { nl: generalInfoUrlNL, en: generalInfoUrlEN },
-                    imageUrl: { nl: generalInfoImageUrlNL, en: generalInfoImageUrlEN }
-                });
-            }
-            
-            if (accessibilityTitleNL || accessibilityTitleEN) {
-                tempAccessibilityInfoItems.push({
-                    title: { nl: accessibilityTitleNL, en: accessibilityTitleEN },
-                    url: { nl: accessibilityUrlNL, en: accessibilityUrlEN },
-                    imageUrl: { nl: accessibilityImageUrlNL, en: accessibilityImageUrlEN }
-                });
-            }
-
-            if (newsTitleNL || newsTitleEN) {
-                tempNewsItems.push({
-                    title: { nl: newsTitleNL, en: newsTitleEN },
-                    url: { nl: newsUrlNL, en: newsUrlEN },
-                    imageUrl: { nl: newsImageUrlNL, en: newsImageUrlEN }
                 });
             }
         }
         
-        const uniqueEventsForDisplay = [...new Set(allParsedData.map(item => item.event).filter(Boolean))].sort((a,b) => (parseDateForSorting(localEventInfoMap[a]?.dateString) || 0) - (parseDateForSorting(localEventInfoMap[b]?.dateString) || 0));
-
         const now = new Date();
         const cutoffTime = new Date(now.getTime() - 45 * 60 * 1000);
-        const filteredDataForDisplay = allParsedData.filter(item => {
-            if (!item.date || !item.time) return true;
+        
+        const eventsWithFuturePerformances = new Set();
+        allParsedData.forEach(item => {
             const perfDate = parseDateForSorting(item.date);
-            if(isNaN(perfDate.getTime())) return true;
+            if(isNaN(perfDate.getTime())) return;
             const [h, m] = item.time.split(':');
             perfDate.setHours(h, m, 0, 0);
-            return perfDate >= cutoffTime;
+            if (perfDate >= cutoffTime) {
+                eventsWithFuturePerformances.add(item.event);
+            }
         });
-        
-        const uniqueGeneralInfoData = Array.from(new Set(tempGeneralInfoItems.map(item => JSON.stringify(item)))).map(item => JSON.parse(item));
-        const uniqueAccessibilityInfoData = Array.from(new Set(tempAccessibilityInfoItems.map(item => JSON.stringify(item)))).map(item => JSON.parse(item));
-        const uniqueNewsData = Array.from(new Set(tempNewsItems.map(item => JSON.stringify(item)))).map(item => JSON.parse(item));
-        const finalBenefactorLogos = Array.from(tempBenefactorLogos, ([url, name]) => ({ url, name }));
 
+        const filteredDataForDisplay = allParsedData.filter(item => eventsWithFuturePerformances.has(item.event));
+        const uniqueEventsForDisplay = Object.keys(localEventInfoMap)
+            .filter(eventName => eventsWithFuturePerformances.has(eventName))
+            .sort((a,b) => (parseDateForSorting(localEventInfoMap[a]?.dateString) || 0) - (parseDateForSorting(localEventInfoMap[b]?.dateString) || 0));
+
+        const tempGeneralInfoItems = info.map(item => ({
+            title: { nl: item.NameNl, en: item.NameEng },
+            url: { nl: item.MeerInfoNl, en: item.MeerInfoEng },
+            imageUrl: { nl: item.MeerInfoAfbeelding, en: item.MeerInfoAfbeelding }
+        }));
+        
+        const tempAccessibilityInfoItems = accessibility.map(item => ({
+            title: { nl: item.ToegankelijkheidTitleNl, en: item.ToegankelijkheidTitleEng },
+            url: { nl: item.ToegankelijkheidUrlNl, en: item.ToegankelijkheidUrlEng },
+            imageUrl: { nl: item.ToegankelijkheidAfbeelding, en: item.ToegankelijkheidAfbeelding }
+        }));
+
+        const tempNewsItems = news.map(item => ({
+            title: { nl: item.NieuwsTitelNl, en: item.NieuwsTitelEng },
+            url: { nl: item.NieuwsUrlNl, en: item.NieuwsUrlEng },
+            imageUrl: { nl: item.NieuwsAfbeelding, en: item.NieuwsAfbeelding }
+        }));
+
+        const tempBenefactorLogos = sponsors.map(item => ({ url: item.LogoSponsor, name: item.Name }));
+        
         setError(null);
         setIsOffline(false);
         setTimetableData(filteredDataForDisplay);
         setEventInfoMap(localEventInfoMap);
         setUniqueEvents(uniqueEventsForDisplay);
-        setGeneralInfoData(uniqueGeneralInfoData);
-        setAccessibilityInfoData(uniqueAccessibilityInfoData);
-        setNewsData(uniqueNewsData);
-        setBenefactorLogos(finalBenefactorLogos);
+        setGeneralInfoData(tempGeneralInfoItems);
+        setAccessibilityInfoData(tempAccessibilityInfoItems);
+        setNewsData(tempNewsItems);
+        setBenefactorLogos(tempBenefactorLogos);
         
-        localStorage.setItem('ctfTimetableCache', JSON.stringify({
-            data: filteredDataForDisplay,
-            eventInfoMap: localEventInfoMap,
-            uniqueEvents: uniqueEventsForDisplay,
-            timestamp: new Date().getTime()
+        localStorage.setItem('ctfAppwriteCache', JSON.stringify({
+            data: filteredDataForDisplay, eventInfoMap: localEventInfoMap, uniqueEvents: uniqueEventsForDisplay,
+            generalInfo: tempGeneralInfoItems, accessibilityInfo: tempAccessibilityInfoItems,
+            news: tempNewsItems, benefactors: tempBenefactorLogos, timestamp: new Date().getTime()
         }));
-        localStorage.setItem('ctfGeneralInfoCache', JSON.stringify(uniqueGeneralInfoData));
-        localStorage.setItem('ctfAccessibilityInfoCache', JSON.stringify(uniqueAccessibilityInfoData));
-        localStorage.setItem('ctfNewsCache', JSON.stringify(uniqueNewsData));
-        localStorage.setItem('ctfBenefactorLogosCache', JSON.stringify(finalBenefactorLogos));
         
         return filteredDataForDisplay;
 
     } catch (err) {
-        console.error("Fout bij het ophalen van gegevens:", err);
-        const cached = localStorage.getItem('ctfTimetableCache');
+        console.error("Fout bij het ophalen van Appwrite gegevens:", err);
+        const cached = localStorage.getItem('ctfAppwriteCache');
 
         if (cached) {
             setIsOffline(true);
@@ -2718,32 +2797,24 @@ const AppContent = () => {
         let dataFromCache = [];
         
         try {
-            const cachedTimetable = localStorage.getItem('ctfTimetableCache');
-            if (cachedTimetable) {
-                const { data, eventInfoMap, uniqueEvents } = JSON.parse(cachedTimetable);
+            const cached = localStorage.getItem('ctfAppwriteCache');
+            if (cached) {
+                const { data, eventInfoMap, uniqueEvents, generalInfo, accessibilityInfo, news, benefactors } = JSON.parse(cached);
                 dataFromCache = data || [];
                 setTimetableData(dataFromCache);
                 setEventInfoMap(eventInfoMap || {});
                 setUniqueEvents(uniqueEvents || []);
+                setGeneralInfoData(generalInfo || []);
+                setAccessibilityInfoData(accessibilityInfo || []);
+                setNewsData(news || []);
+                setBenefactorLogos(benefactors || []);
             }
-            const cachedGeneralInfo = localStorage.getItem('ctfGeneralInfoCache');
-            if (cachedGeneralInfo) setGeneralInfoData(JSON.parse(cachedGeneralInfo));
-            
-            const cachedAccessibilityInfo = localStorage.getItem('ctfAccessibilityInfoCache');
-            if (cachedAccessibilityInfo) setAccessibilityInfoData(JSON.parse(cachedAccessibilityInfo));
-
-            const cachedNews = localStorage.getItem('ctfNewsCache');
-            if (cachedNews) setNewsData(JSON.parse(cachedNews));
-
-            const cachedBenefactorLogos = localStorage.getItem('ctfBenefactorLogosCache');
-            if (cachedBenefactorLogos) setBenefactorLogos(cachedBenefactorLogos);
-
         } catch (e) {
-            console.error("Kon cache niet laden", e);
-            localStorage.clear(); // Clear all local storage on parsing error
+            console.error("Kon cache niet laden, cache wordt gewist", e);
+            localStorage.clear();
         }
         
-        const fetchedData = await fetchTimetableData();
+        const fetchedData = await fetchDataFromAppwrite();
         const finalData = fetchedData.length > 0 ? fetchedData : dataFromCache;
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -2773,23 +2844,15 @@ const AppContent = () => {
             setShowImportPopup(true);
         } else {
             const hash = window.location.hash.substring(1);
-            if (hash === 'favorites') {
-                handleViewChange('favorites');
-            } else if (hash === 'friends-favorites') {
-                handleViewChange('friends-favorites');
-            } else if (hash === 'more-info') {
-                handleViewChange('more-info');
-            } else if (hash === 'news') {
-                handleViewChange('news');
-            } else if (hash) {
-                handleViewChange('timetable', decodeURIComponent(hash));
+            if (hash && hash !== '#') {
+                if (hash === 'favorites') handleViewChange('favorites');
+                else if (hash === 'friends-favorites') handleViewChange('friends-favorites');
+                else if (hash === 'more-info') handleViewChange('more-info');
+                else handleViewChange('timetable', decodeURIComponent(hash));
             } else {
                 try {
                     window.history.replaceState({ view: 'initial' }, '', window.location.pathname + '#');
-                }
-                catch (e) {
-                    console.warn("Could not update history state:", e);
-                }
+                } catch(e) { console.warn("Could not update history state:", e); }
             }
         }
         
@@ -2798,7 +2861,7 @@ const AppContent = () => {
 
     init();
 
-    const intervalId = setInterval(fetchTimetableData, 120000);
+    const intervalId = setInterval(fetchDataFromAppwrite, 120000);
 
     return () => clearInterval(intervalId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3085,6 +3148,7 @@ const AppContent = () => {
   }, [language, translations, scheduledCustomNotifications, permissionRequestDismissed, showPermissionDialog]);
 
   useEffect(() => {
+    const gistNotificationsUrl = 'https://ldegroen.github.io/ctf-notificaties/notifications.json'; 
     const fetchAndProcessGistNotifications = async () => {
       if (!gistNotificationsUrl) return;
       try {
@@ -3207,6 +3271,10 @@ const AppContent = () => {
 
   const handleIconMouseLeave = useCallback(() => setShowCustomTooltip(false), []);
   
+  const handleScrollToNews = () => {
+    newsSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
   const renderMainContent = () => {
       if (loading && isInitialLoad) {
         return (
@@ -3218,35 +3286,18 @@ const AppContent = () => {
       
       if (currentView === 'more-info') {
           return (
-              <div className={`transition-opacity duration-500 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
-                  <div className={`transition-opacity duration-300 ${isContentVisible ? 'opacity-100' : 'opacity-0'}`}>
-                      <MoreInfoPage
-                          generalInfoItems={generalInfoData}
-                          accessibilityInfoItems={accessibilityInfoData}
-                          openContentPopup={openContentPopup}
-                          language={language}
-                          translations={translations}
-                      />
-                  </div>
+              <div className={`transition-opacity duration-300 ${isContentVisible ? 'opacity-100' : 'opacity-0'}`}>
+                  <MoreInfoPage
+                      generalInfoItems={generalInfoData}
+                      accessibilityInfoItems={accessibilityInfoData}
+                      openContentPopup={openContentPopup}
+                      language={language}
+                      translations={translations}
+                  />
               </div>
           );
       }
-
-      if (currentView === 'news') {
-          return (
-              <div className={`transition-opacity duration-500 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
-                  <div className={`transition-opacity duration-300 ${isContentVisible ? 'opacity-100' : 'opacity-0'}`}>
-                      <NewsPage
-                          newsItems={newsData}
-                          openContentPopup={openContentPopup}
-                          language={language}
-                          translations={translations}
-                      />
-                  </div>
-              </div>
-          );
-      }
-
+      
       const isFavorites = currentView === 'favorites';
       const isFriendsFavorites = currentView === 'friends-favorites';
 
@@ -3264,104 +3315,95 @@ const AppContent = () => {
       }
       
       return (
-        <div className={`transition-opacity duration-500 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
-          <div className={`transition-opacity duration-300 ${isContentVisible ? 'opacity-100' : 'opacity-0'}`}>
-            {(selectedEvent || isFavorites || isFriendsFavorites) && (
-                <>
-                  {currentView === 'friends-favorites' && friendsFavorites.size > 0 ? (
-                      <div className="flex flex-col items-center justify-center mt-12 mb-8 text-center">
-                          <button 
-                              onClick={handleClearFriendsFavorites} 
-                              className="px-6 py-3 bg-[#1a5b64] text-white rounded-lg shadow-md hover:bg-[#2e9aaa] transition-all duration-200 text-base font-semibold"
-                          >
-                              {translations[language].common.removeFriendsFavorites}
-                          </button>
-                      </div>
-                  ) : (
-                      <SponsorDisplay ref={sponsorRef} sponsorInfo={currentSponsorInfo} language={language} translations={translations} />
-                  )}
-                  
-                  {currentView === 'timetable' && !searchTerm && eventViewMode === 'card' && (
-                      <DateNavigation datesForCurrentSelectedEvent={datesForCurrentSelectedEvent} selectedDate={selectedDate} setSelectedDate={setSelectedDate} setSearchTerm={setSearchTerm} translations={translations} language={language} selectedEvent={selectedEvent} timetableData={timetableData} />
-                  )}
-
-                  {currentView === 'timetable' && <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} translations={translations} language={language} />}
-                  
-                  {currentView === 'timetable' && (
-                    <div className="relative flex w-full max-w-md mx-auto flex-row gap-4 mb-8 px-4">
-                        <GenreFilterDropdown
-                            genreFilters={genreFilters}
-                            setGenreFilters={setGenreFilters}
-                            allGenres={allGenres}
-                            language={language}
-                            translations={translations}
-                        />
-                        <IconFilterDropdown
-                            iconFilters={iconFilters}
-                            setIconFilters={setIconFilters}
-                            filterScope={filterScope}
-                            setFilterScope={setFilterScope}
-                            safetyIcons={safetyIcons}
-                            language={language}
-                            translations={translations}
-                        />
+        <div className={`transition-opacity duration-300 ${isContentVisible ? 'opacity-100' : 'opacity-0'}`}>
+          {(selectedEvent || isFavorites || isFriendsFavorites) && (
+              <>
+                {/* ========= WIJZIGING: Nudges hier geplaatst voor correcte zichtbaarheid ========= */}
+                <SearchFilterNudges
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    genreFilters={genreFilters}
+                    setGenreFilters={setGenreFilters}
+                    allGenres={allGenres}
+                    iconFilters={iconFilters}
+                    setIconFilters={setIconFilters}
+                    filterScope={filterScope}
+                    setFilterScope={setFilterScope}
+                    safetyIcons={safetyIcons}
+                    language={language}
+                    translations={translations}
+                />
+              
+                {currentView === 'friends-favorites' && friendsFavorites.size > 0 ? (
+                    <div className="flex flex-col items-center justify-center mt-12 mb-8 text-center">
+                        <button 
+                            onClick={handleClearFriendsFavorites} 
+                            className="px-6 py-3 bg-[#1a5b64] text-white rounded-lg shadow-md hover:bg-[#2e9aaa] transition-all duration-200 text-base font-semibold"
+                        >
+                            {translations[language].common.removeFriendsFavorites}
+                        </button>
                     </div>
-                  )}
+                ) : (
+                    <SponsorDisplay ref={sponsorRef} sponsorInfo={currentSponsorInfo} language={language} translations={translations} />
+                )}
+                
+                {currentView === 'timetable' && !searchTerm && eventViewMode === 'card' && (
+                    <DateNavigation datesForCurrentSelectedEvent={datesForCurrentSelectedEvent} selectedDate={selectedDate} setSelectedDate={setSelectedDate} setSearchTerm={setSearchTerm} translations={translations} language={language} selectedEvent={selectedEvent} timetableData={timetableData} />
+                )}
 
-                  {(isFavorites || isFriendsFavorites || (currentView === 'timetable' && selectedEvent)) && (
-                      <div className="flex flex-wrap justify-center items-center gap-4 my-8">
-                          <EventViewSwitcher 
-                              viewMode={currentViewMode} 
-                              setViewMode={setViewModeFunction}
-                              language={language} 
-                              translations={translations} 
-                              handleAnimatedUpdate={handleAnimatedUpdate}
-                          />
-                          {isFavorites && favorites.size > 0 && (
-                            <button onClick={() => setShowExportModal(true)} className="px-4 py-2 rounded-lg font-semibold bg-green-500 hover:bg-green-600 text-white flex items-center gap-2">
-                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" /></svg>
-                                 {translations[language].common.exportFavorites}
-                            </button>
-                          )}
-                      </div>
-                  )}
-                  
-                  {currentViewMode === 'card' ? (
-                     <TimetableDisplay 
-                        loading={loading && !isInitialLoad} 
-                        error={error} 
-                        displayedData={formattedData} 
-                        currentView={currentView} 
-                        favorites={favorites} 
-                        toggleFavorite={toggleFavorite} 
-                        addToGoogleCalendar={addToGoogleCalendar} 
-                        openContentPopup={openContentPopup} 
-                        language={language} 
-                        handleIconMouseEnter={handleIconMouseEnter} 
-                        handleIconMouseLeave={handleIconMouseLeave} 
-                        translations={translations} 
-                        selectedEvent={selectedEvent} 
-                        searchTerm={searchTerm} 
-                        showMessageBox={showMessageBox} 
-                        selectedDate={selectedDate} 
-                        safetyIcons={safetyIcons} 
-                        speak={speak} 
-                        iconFilters={iconFilters}
-                        genreFilters={genreFilters}
-                    />
-                  ) : (
-                     <BlockTimetable allData={timetableData} favorites={favorites} friendsFavorites={friendsFavorites} toggleFavorite={toggleFavorite} selectedEvent={selectedEvent} openContentPopup={openContentPopup} translations={translations} language={language} isFavoritesView={isFavorites} isFriendsView={isFriendsFavorites} />
-                  )}
-                  
-                  {currentView !== 'block' && selectedEvent && eventInfoMap[selectedEvent]?.mapUrl && !loading && !error && (
-                      <div className="mt-8 mb-8 w-full max-w-sm px-4 cursor-pointer mx-auto" onClick={() => openContentPopup('image', eventInfoMap[selectedEvent].mapUrl)}>
-                          <h2 className="text-center text-white text-2xl font-bold mb-4">{translations[language].common.mapTitle.replace('%s', selectedEvent)}</h2>
-                          <img src={eventInfoMap[selectedEvent].mapUrl} alt={`[Afbeelding van Kaart ${selectedEvent}]`} className="w-full h-auto rounded-lg shadow-lg border-4 border-white/50 hover:border-white transition-all"/>
-                      </div>
-                  )}
-                </>
-            )}
-          </div>
+                {(isFavorites || isFriendsFavorites || (currentView === 'timetable' && selectedEvent)) && (
+                    <div className="flex flex-wrap justify-center items-center gap-4 my-8">
+                        <EventViewSwitcher 
+                            viewMode={currentViewMode} 
+                            setViewMode={setViewModeFunction}
+                            language={language} 
+                            translations={translations} 
+                            handleAnimatedUpdate={handleAnimatedUpdate}
+                        />
+                        {isFavorites && favorites.size > 0 && (
+                          <button onClick={() => setShowExportModal(true)} className="px-4 py-2 rounded-lg font-semibold bg-green-500 hover:bg-green-600 text-white flex items-center gap-2">
+                               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" /></svg>
+                               {translations[language].common.exportFavorites}
+                          </button>
+                        )}
+                    </div>
+                )}
+                
+                {currentViewMode === 'card' ? (
+                   <TimetableDisplay 
+                      loading={loading && !isInitialLoad} 
+                      error={error} 
+                      displayedData={formattedData} 
+                      currentView={currentView} 
+                      favorites={favorites} 
+                      toggleFavorite={toggleFavorite} 
+                      addToGoogleCalendar={addToGoogleCalendar} 
+                      openContentPopup={openContentPopup} 
+                      language={language} 
+                      handleIconMouseEnter={handleIconMouseEnter} 
+                      handleIconMouseLeave={handleIconMouseLeave} 
+                      translations={translations} 
+                      selectedEvent={selectedEvent} 
+                      searchTerm={searchTerm} 
+                      showMessageBox={showMessageBox} 
+                      selectedDate={selectedDate} 
+                      safetyIcons={safetyIcons} 
+                      speak={speak} 
+                      iconFilters={iconFilters}
+                      genreFilters={genreFilters}
+                  />
+                ) : (
+                   <BlockTimetable allData={timetableData} favorites={favorites} friendsFavorites={friendsFavorites} toggleFavorite={toggleFavorite} selectedEvent={selectedEvent} openContentPopup={openContentPopup} translations={translations} language={language} isFavoritesView={isFavorites} isFriendsView={isFriendsFavorites} />
+                )}
+                
+                {currentView !== 'block' && selectedEvent && eventInfoMap[selectedEvent]?.mapUrl && !loading && !error && (
+                    <div className="mt-8 mb-8 w-full max-w-sm px-4 cursor-pointer mx-auto" onClick={() => openContentPopup('image', eventInfoMap[selectedEvent].mapUrl)}>
+                        <h2 className="text-center text-white text-2xl font-bold mb-4">{translations[language].common.mapTitle.replace('%s', selectedEvent)}</h2>
+                        <img src={eventInfoMap[selectedEvent].mapUrl} alt={`[Afbeelding van Kaart ${selectedEvent}]`} className="w-full h-auto rounded-lg shadow-lg border-4 border-white/50 hover:border-white transition-all"/>
+                    </div>
+                )}
+              </>
+          )}
         </div>
       )
   }
@@ -3376,8 +3418,10 @@ const AppContent = () => {
         #app-container.underline-links a, #app-container.underline-links button { text-decoration: underline !important; }
         #app-container.readable-font { font-family: 'Arial', sans-serif !important; }
         #app-container.readable-font h1, #app-container.readable-font h2, #app-container.readable-font h3 { font-family: 'Arial', sans-serif !important; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
     `}</style>
-    <div id="app-container" className={`min-h-screen bg-[#20747f] font-sans text-gray-100 flex flex-col items-center relative overflow-x-hidden ${isInitialLoad ? 'h-screen overflow-hidden' : ''}`}>
+    <div id="app-container" className="min-h-screen bg-[#20747f] font-sans text-gray-100 flex flex-col items-center relative overflow-x-hidden">
       
       <StickyHeader 
           isVisible={showStickyHeader} 
@@ -3386,7 +3430,6 @@ const AppContent = () => {
           handleFavoritesClick={() => handleViewChange('favorites')} 
           handleFriendsFavoritesClick={() => handleViewChange('friends-favorites')}
           handleMoreInfoClick={() => handleViewChange('more-info')}
-          handleNewsClick={() => handleViewChange('news')}
           hasFriendsFavorites={friendsFavorites.size > 0}
           onLogoClick={handleStickyLogoClick} 
           selectedEvent={selectedEvent} 
@@ -3396,68 +3439,79 @@ const AppContent = () => {
           translations={translations} 
           onReadPage={handleReadPage}
           openContentPopup={openContentPopup}
+          isInitialLoad={isInitialLoad}
       />
       
       <OfflineIndicator 
         isOffline={isOffline} 
         language={language} 
         translations={translations} 
-        onRetry={fetchTimetableData}
+        onRetry={fetchDataFromAppwrite}
       />
-
-      <div className="w-full flex-grow relative">
-        <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${isInitialLoad ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'}`}>
-          <div className="w-full h-full flex flex-col items-center p-4 sm:p-6 md:p-8">
-            <div className={`fixed inset-x-0 bottom-0 z-0 transition-opacity duration-700 ${isInitialLoad ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              <div className="relative w-full max-w-2xl mx-auto">
-                <img src="https://cafetheaterfestival.nl/wp-content/uploads/2025/06/CTF-2025-campagnebeeld-zonder-achtergrond-scaled.png" alt="[Afbeelding van campagnebeeld sfeer]" className="w-full h-auto pointer-events-none" />
-              </div>
-            </div>
-            <div className="relative z-10 w-full">
-              <div className="absolute top-12 left-4 flex flex-col space-y-2 items-start sm:flex-row sm:space-y-0 sm:space-x-2 sm:items-center">
-                  <button onClick={() => openContentPopup('iframe', 'https://form.jotform.com/223333761374051')} className="px-3 py-1 h-8 sm:h-10 rounded-full bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50 transition-colors duration-200 text-sm font-semibold">
-                    {translations[language].common.becomeRegularGuest}
-                  </button>
-                  <button onClick={() => setShowPrivacyPolicy(true)} className="px-3 py-1 h-8 sm:h-10 rounded-full bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50 transition-colors duration-200 text-sm font-semibold">
-                    {translations[language].common.privacyPolicy}
-                  </button>
-              </div>
-              <TopRightControls 
-                language={language} 
-                handleLanguageChange={handleLanguageChange} 
-                onReadPage={handleReadPage} 
-                translations={translations}
-              />
-              
-              <AppHeader translations={translations} language={language} titleRef={titleRef} />
-              {!loading && (
-                <div>
-                  <EventNavigation 
-                      onEventSelect={(e) => handleViewChange('timetable', e)} 
-                      onFavoritesSelect={() => handleViewChange('favorites')} 
-                      onFriendsFavoritesSelect={() => handleViewChange('friends-favorites')}
-                      onMoreInfoSelect={() => handleViewChange('more-info')}
-                      onNewsSelect={() => handleViewChange('news')}
-                      hasFriendsFavorites={friendsFavorites.size > 0}
-                      uniqueEvents={uniqueEvents} 
-                      language={language} 
-                      translations={translations} 
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${isInitialLoad ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
-           <div id="main-content-area" className={`w-full h-full overflow-y-auto p-4 sm:p-6 md:p-8 ${showStickyHeader ? 'pt-24 sm:pt-20' : ''}`}>
-            {renderMainContent()}
-          </div>
-        </div>
-      </div>
       
-      {(currentView === 'more-info' || currentView === 'news') && <AppFooter logos={benefactorLogos} language={language} translations={translations} />}
+      <div className="w-full flex-grow flex flex-col">
+          <div className="relative min-h-screen">
+            <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${isInitialLoad ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'}`}>
+              <div className="w-full h-full flex flex-col items-center p-4 sm:p-6 md:p-8">
+                <div className={`fixed inset-x-0 bottom-0 z-0 transition-opacity duration-700 ${isInitialLoad ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                  <div className="relative w-full max-w-2xl mx-auto">
+                    <img src="https://cafetheaterfestival.nl/wp-content/uploads/2025/06/CTF-2025-campagnebeeld-zonder-achtergrond-scaled.png" alt="[Afbeelding van campagnebeeld sfeer]" className="w-full h-auto pointer-events-none" />
+                  </div>
+                </div>
+                <div className="relative z-10 w-full">
+                  <div className="absolute top-12 left-4 flex flex-col space-y-2 items-start sm:flex-row sm:space-y-0 sm:space-x-2 sm:items-center">
+                      <button onClick={() => openContentPopup('iframe', 'https://form.jotform.com/223333761374051')} className="px-3 py-1 h-8 sm:h-10 rounded-full bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50 transition-colors duration-200 text-sm font-semibold">
+                        {translations[language].common.becomeRegularGuest}
+                      </button>
+                      <button onClick={() => setShowPrivacyPolicy(true)} className="px-3 py-1 h-8 sm:h-10 rounded-full bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50 transition-colors duration-200 text-sm font-semibold">
+                        {translations[language].common.privacyPolicy}
+                      </button>
+                  </div>
+                  <TopRightControls 
+                    language={language} 
+                    handleLanguageChange={handleLanguageChange} 
+                    onReadPage={handleReadPage} 
+                    translations={translations}
+                  />
+                  
+                  <AppHeader translations={translations} language={language} titleRef={titleRef} />
+                  {!loading && (
+                    <div>
+                      <EventNavigation 
+                          onEventSelect={(e) => handleViewChange('timetable', e)} 
+                          onFavoritesSelect={() => handleViewChange('favorites')} 
+                          onFriendsFavoritesSelect={() => handleViewChange('friends-favorites')}
+                          onMoreInfoSelect={() => handleViewChange('more-info')}
+                          hasFriendsFavorites={friendsFavorites.size > 0}
+                          uniqueEvents={uniqueEvents} 
+                          language={language} 
+                          translations={translations} 
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+              <ScrollDownButton onClick={handleScrollToNews} translations={translations} language={language} />
+            </div>
 
+            <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${isInitialLoad ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+               <div id="main-content-area" className={`w-full h-full overflow-y-auto p-4 sm:p-6 md:p-8 ${showStickyHeader ? 'pt-24 sm:pt-20' : ''}`}>
+                {renderMainContent()}
+              </div>
+            </div>
+          </div>
+          
+          <div ref={newsSectionRef}>
+             <NewsPage
+                newsItems={newsData}
+                openContentPopup={openContentPopup}
+                language={language}
+                translations={translations}
+             />
+          </div>
+          
+          <AppFooter logos={benefactorLogos} language={language} translations={translations} />
+      </div>
       <PopupModal showPopup={showPopup} closePopup={closePopup} popupContent={popupContent} language={language} translations={translations} speak={speak} />
       <PrivacyPolicyModal showPrivacyPolicy={showPrivacyPolicy} setShowPrivacyPolicy={setShowPrivacyPolicy} language={language} renderPrivacyPolicyContent={renderPrivacyPolicyContent} translations={translations} speak={speak} />
       <CustomTooltip showCustomTooltip={showCustomTooltip} customTooltipContent={customTooltipContent} customTooltipPosition={customTooltipPosition} />
