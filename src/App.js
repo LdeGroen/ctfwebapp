@@ -16,6 +16,7 @@ const APPWRITE_CONFIG = {
         sponsors: '68948b97003e5aa5068c',
         info: '68945b4f000e7c3880cb',
         toegankelijkheid: '6894d367002bf2645148',
+        marketing: '689ded8900383f2d618b', // TOEGEVOEGD: Marketing collectie ID
     }
 };
 
@@ -55,40 +56,52 @@ class ErrorBoundary extends React.Component {
 }
 
 
+// ========= WIJZIGING: Robuustere datum-parsering om sorteerfouten te voorkomen =========
 const parseDateForSorting = (dateString) => {
   if (!dateString || typeof dateString !== 'string') return new Date(NaN);
   
-  const isoDate = new Date(dateString);
-  if (!isNaN(isoDate.getTime())) {
-    return isoDate;
-  }
-
   const trimmedDateString = dateString.trim();
-  let day, month, year;
 
-  let [d, m, y] = trimmedDateString.split('-');
-  if (d && m && y && !isNaN(parseInt(m, 10))) {
-    day = parseInt(d, 10);
-    month = parseInt(m, 10);
-    year = parseInt(y, 10);
-    return new Date(year, month - 1, day);
+  // Prioriteer 'dd-mm-yyyy' formaat door het om te zetten naar 'yyyy-mm-dd'
+  // Dit formaat wordt eenduidig geïnterpreteerd door `new Date()`
+  const dmyParts = trimmedDateString.split('-');
+  if (dmyParts.length === 3) {
+      const [d, m, y] = dmyParts;
+      if (!isNaN(parseInt(d, 10)) && !isNaN(parseInt(m, 10)) && !isNaN(parseInt(y, 10))) {
+          const isoFormattedString = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          const date = new Date(isoFormattedString);
+          if (!isNaN(date.getTime())) {
+              return date;
+          }
+      }
   }
   
+  // Verwerk 'dd maandnaam yyyy' formaat
   const monthNames = {
-    'januari': 1, 'jan': 1, 'februari': 2, 'feb': 2, 'maart': 3, 'mrt': 3,
-    'april': 4, 'apr': 4, 'mei': 5, 'juni': 6, 'jun': 6, 'juli': 7, 'jul': 7,
-    'augustus': 8, 'aug': 8, 'september': 9, 'sep': 9, 'oktober': 10, 'okt': 10,
-    'november': 11, 'nov': 11, 'december': 12, 'dec': 12
+    'januari': '01', 'jan': '01', 'februari': '02', 'feb': '02', 'maart': '03', 'mrt': '03',
+    'april': '04', 'apr': '04', 'mei': '05', 'juni': '06', 'jun': '06', 'juli': '07', 'jul': '07',
+    'augustus': '08', 'aug': '08', 'september': '09', 'sep': '09', 'oktober': '10', 'okt': '10',
+    'november': '11', 'nov': '11', 'december': '12', 'dec': '12'
   };
 
-  const parts = trimmedDateString.split(' ');
-  if (parts.length === 3 && parts[1]) {
-    day = parseInt(parts[0], 10);
-    const monthNum = monthNames[parts[1].toLowerCase()];
-    year = parseInt(parts[2], 10);
-    if (!isNaN(day) && monthNum && !isNaN(year)) {
-      return new Date(year, monthNum - 1, day);
+  const textParts = trimmedDateString.split(' ');
+  if (textParts.length === 3 && textParts[1]) {
+    const day = textParts[0];
+    const monthNum = monthNames[textParts[1].toLowerCase()];
+    const year = textParts[2];
+    if (day && monthNum && year) {
+        const isoFormattedString = `${year}-${monthNum}-${String(day).padStart(2, '0')}`;
+        const date = new Date(isoFormattedString);
+        if (!isNaN(date.getTime())) {
+            return date;
+        }
     }
+  }
+
+  // Fallback voor andere formaten die Date.parse mogelijk begrijpt
+  const fallbackDate = new Date(trimmedDateString);
+  if (!isNaN(fallbackDate.getTime())) {
+      return fallbackDate;
   }
 
   return new Date(NaN);
@@ -877,15 +890,34 @@ const SearchFilterNudges = ({
     return (
         <div
             ref={nudgeRef}
-            className="fixed top-1/2 left-0 transform -translate-y-1/2 z-50 flex items-center pointer-events-none"
+            className={`fixed top-1/2 left-0 transform -translate-y-1/2 z-50 flex items-center ${!isSearchOpen && !isFilterOpen ? 'pointer-events-none' : 'pointer-events-auto'}`}
         >
-            <div className="pointer-events-auto">
-                <div className={`bg-[#1a5b64] rounded-r-lg shadow-xl p-4 text-white w-80 transition-all duration-300 ease-in-out ${isSearchOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
+            <div className="flex flex-col space-y-2 pointer-events-auto">
+                 <button
+                    onClick={toggleSearch}
+                    className={`w-14 h-14 bg-[#2e9aaa] rounded-r-full shadow-lg flex items-center justify-center hover:bg-[#20747f] transition-colors focus:outline-none pl-3 ${isSearchOpen ? 'bg-[#20747f]' : ''}`}
+                    aria-label="Zoeken"
+                    aria-expanded={isSearchOpen}
+                >
+                    <SearchIcon />
+                </button>
+                 <button
+                    onClick={toggleFilter}
+                    className={`w-14 h-14 bg-[#2e9aaa] rounded-r-full shadow-lg flex items-center justify-center hover:bg-[#20747f] transition-colors focus:outline-none pl-3 ${isFilterOpen ? 'bg-[#20747f]' : ''}`}
+                    aria-label="Filteren"
+                    aria-expanded={isFilterOpen}
+                >
+                    <FilterIcon />
+                </button>
+            </div>
+
+            <div className={`relative transition-all duration-300 ease-in-out w-80 h-[28rem] rounded-r-lg shadow-xl ml-[-1px] ${isSearchOpen || isFilterOpen ? 'translate-x-0 opacity-100 bg-[#1a5b64]' : '-translate-x-full opacity-0 bg-transparent'}`}>
+                <div className={`absolute inset-0 p-4 text-white transition-opacity duration-300 pointer-events-none ${isSearchOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0'}`}>
                     <h3 className="font-bold text-lg mb-4">{translations[language].common.searchPlaceholder.split('...')[0]}</h3>
                     <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} translations={translations} language={language} />
                 </div>
 
-                 <div className={`bg-[#1a5b64] rounded-r-lg shadow-xl p-4 text-white w-80 transition-all duration-300 ease-in-out absolute top-0 ${isFilterOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
+                 <div className={`absolute inset-0 p-4 text-white transition-opacity duration-300 pointer-events-none ${isFilterOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0'}`}>
                     <h3 className="font-bold text-lg mb-4">{translations[language].common.filterByIcon.split('...')[0]}</h3>
                     <div className="space-y-4 relative">
                         <GenreFilterDropdown
@@ -906,25 +938,6 @@ const SearchFilterNudges = ({
                         />
                     </div>
                 </div>
-            </div>
-
-            <div className="flex flex-col space-y-2 ml-2 pointer-events-auto">
-                 <button
-                    onClick={toggleSearch}
-                    className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-colors focus:outline-none ${isSearchOpen ? 'bg-[#20747f]' : 'bg-[#2e9aaa] hover:bg-[#20747f]'}`}
-                    aria-label="Zoeken"
-                    aria-expanded={isSearchOpen}
-                >
-                    <SearchIcon />
-                </button>
-                 <button
-                    onClick={toggleFilter}
-                    className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-colors focus:outline-none ${isFilterOpen ? 'bg-[#20747f]' : 'bg-[#2e9aaa] hover:bg-[#20747f]'}`}
-                    aria-label="Filteren"
-                    aria-expanded={isFilterOpen}
-                >
-                    <FilterIcon />
-                </button>
             </div>
         </div>
     );
@@ -1002,19 +1015,19 @@ const PerformanceCard = ({ item, favorites, toggleFavorite, addToGoogleCalendar,
     };
 
     return (
-        <div className={`text-gray-800 rounded-xl shadow-xl border border-gray-200 transition-all duration-300 flex flex-col relative w-full md:w-[384px] bg-white overflow-hidden ${isCancelled || isFull ? 'opacity-50' : 'hover:scale-105 hover:shadow-2xl cursor-pointer'}`} onClick={() => !isCancelled && !isFull && !isExportMode && openContentPopup('iframe', item.url)}>
+        <div className={`text-gray-800 rounded-xl shadow-xl border border-gray-200 transition-all duration-300 flex flex-col relative w-full md:w-[384px] bg-white overflow-hidden ${isCancelled || isFull ? 'opacity-50' : 'hover:scale-105 hover:shadow-2xl cursor-pointer'}`} onClick={() => !isCancelled && !isFull && !isExportMode && openContentPopup('performance', item)}>
             {translatedGenre && (
-                <div className="bg-[#2e9aaa] text-white text-sm font-bold uppercase tracking-wider text-center py-1 px-4">
+                <div className="bg-[#2e9aaa] text-white text-sm md:text-base font-bold uppercase tracking-wider text-center py-1 px-4">
                     {translatedGenre}
                 </div>
             )}
             
             <div className="p-4 flex flex-col flex-grow">
-                {!hideTime && <p className="text-xl font-bold text-gray-800 mb-2">{item.time}</p>}
+                {!hideTime && <p className="text-xl md:text-2xl font-bold text-gray-800 mb-2">{item.time}</p>}
                 
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-2">
-                    <h3 className="text-lg font-semibold text-[#20747f] mb-1 sm:mb-0 sm:mr-4 flex-grow">{fullTitle}</h3>
-                    <a href={item.googleMapsUrl || '#'} target="_blank" rel="noopener noreferrer" onClick={(e) => { if (!item.googleMapsUrl || isExportMode) e.preventDefault(); e.stopPropagation(); }} className={`flex items-center text-md font-semibold text-gray-600 flex-shrink-0 text-right ${item.googleMapsUrl && !isExportMode ? 'hover:text-[#1a5b64] cursor-pointer' : 'cursor-default'} transition-colors duration-200`} title={item.googleMapsUrl ? translations[language].common.openLocationInGoogleMaps : ''}>
+                    <h3 className="text-lg md:text-xl font-semibold text-[#20747f] mb-1 sm:mb-0 sm:mr-4 flex-grow">{fullTitle}</h3>
+                    <a href={item.googleMapsUrl || '#'} target="_blank" rel="noopener noreferrer" onClick={(e) => { if (!item.googleMapsUrl || isExportMode) e.preventDefault(); e.stopPropagation(); }} className={`flex items-center text-md md:text-lg font-semibold text-gray-600 flex-shrink-0 text-right ${item.googleMapsUrl && !isExportMode ? 'hover:text-[#1a5b64] cursor-pointer' : 'cursor-default'} transition-colors duration-200`} title={item.googleMapsUrl ? translations[language].common.openLocationInGoogleMaps : ''}>
                         {item.location}
                         {item.googleMapsUrl && (
                             <span className="ml-1 text-[#20747f]">
@@ -1078,17 +1091,17 @@ const PerformanceCard = ({ item, favorites, toggleFavorite, addToGoogleCalendar,
                     </div>
                     {!isExportMode && (
                         <div className="flex flex-col sm:flex-row gap-2">
-                            {item.isCalmRoute && (<button onClick={(e) => { e.stopPropagation(); openContentPopup('calmRouteInfo', translations[language].calmRouteInfo);}} className="px-4 py-2 bg-[#20747f] text-white rounded-lg shadow-md hover:bg-[#1a5b64] transition-all duration-200 text-sm font-semibold text-center">{translations[language].common.calmRoute}</button>)}
+                            {item.isCalmRoute && (<button onClick={(e) => { e.stopPropagation(); openContentPopup('calmRouteInfo', translations[language].calmRouteInfo);}} className="px-4 py-2 bg-[#20747f] text-white rounded-lg shadow-md hover:bg-[#1a5b64] transition-all duration-200 text-sm md:text-base font-semibold text-center">{translations[language].common.calmRoute}</button>)}
                             {item.pwycLink && (
                                 <button 
                                     onClick={(e) => { e.stopPropagation(); if (item.pwycLink) window.open(item.pwycLink, '_blank', 'noopener,noreferrer'); }} 
-                                    className="px-4 py-2 bg-[#20747f] text-white rounded-lg shadow-md hover:bg-[#1a5b64] transition-all duration-200 text-sm font-semibold text-center" 
+                                    className="px-4 py-2 bg-[#20747f] text-white rounded-lg shadow-md hover:bg-[#1a5b64] transition-all duration-200 text-sm md:text-base font-semibold text-center" 
                                     title={translations[language].payWhatYouCan.title}
                                 >
                                     {translations[language].payWhatYouCan.title}
                                 </button>
                             )}
-                            <button onClick={(e) => { e.stopPropagation(); openContentPopup('iframe', item.url); }} className="px-4 py-2 bg-[#20747f] text-white rounded-lg shadow-md hover:bg-[#1a5b64] transition-all duration-200 text-sm" disabled={!item.url || item.url === 'N/A'}>{translations[language].common.moreInfo}</button>
+                            <button onClick={(e) => { e.stopPropagation(); openContentPopup('performance', item); }} className="px-4 py-2 bg-[#20747f] text-white rounded-lg shadow-md hover:bg-[#1a5b64] transition-all duration-200 text-sm md:text-base">{translations[language].common.moreInfo}</button>
                         </div>
                     )}
                 </div>
@@ -1309,7 +1322,7 @@ const BlockTimetable = React.forwardRef(({ allData, favorites, toggleFavorite, s
         
         return (
             <div 
-                onClick={() => !isCancelled && !isExportMode && openContentPopup('iframe', performance.url)}
+                onClick={() => !isCancelled && !isExportMode && openContentPopup('performance', performance)}
                 className={`relative text-white text-xs p-2 rounded-md w-full h-full flex flex-col items-center justify-center text-center transition-colors ${!isCancelled && !isExportMode ? 'cursor-pointer' : ''} ${cellBgClass}`}
             >
                 <div className="w-full pr-6">
@@ -1510,6 +1523,75 @@ const ZoomableImage = ({ src, alt }) => {
     );
 };
 
+// ========= WIJZIGING: Responsive tekstgrootte toegevoegd =========
+const PerformanceDetailPopup = ({ item, language }) => {
+    const title = item.artist ? `${item.artist} - ${item.title}` : item.title;
+    const credits = item.marketingCredits;
+    const textAboutPerformance = language === 'nl' ? item.marketingVoorstellingNL : item.marketingVoorstellingENG;
+    const textAboutMakers = language === 'nl' ? item.marketingBioNL : item.marketingBioENG;
+    const image1 = item.marketingAfbeelding1;
+    const image2 = item.marketingAfbeelding2;
+    const keywords = item.marketingKeywords;
+
+    const renderTextWithLineBreaks = (text) => {
+        if (!text) return null;
+        return text.split('\n').map((line, index) => (
+            <p key={index} className="mb-2">{line}</p>
+        ));
+    };
+
+    return (
+        <div className="overflow-y-auto flex-grow p-4 sm:p-6 md:p-8 text-white">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 text-center">{title}</h2>
+            {credits && <p className="text-center text-gray-300 mb-6 italic md:text-lg">{credits}</p>}
+
+            <div className="space-y-8 max-w-4xl mx-auto">
+                {/* Block 1: Text Left, Image Right */}
+                {(textAboutPerformance || image1) && (
+                    <div className="flex flex-col md:flex-row items-center gap-6">
+                        <div className="md:w-1/2 text-left">
+                            <h3 className="text-xl md:text-2xl font-semibold mb-3 border-b-2 border-white/50 pb-2">Over de voorstelling</h3>
+                            <div className="prose prose-invert max-w-none md:prose-lg">
+                                {renderTextWithLineBreaks(textAboutPerformance)}
+                            </div>
+                        </div>
+                        {image1 && (
+                            <div className="md:w-1/2">
+                                <img src={image1} alt={`[Afbeelding van ${title}]`} className="rounded-lg shadow-lg w-full h-auto object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Block 2: Image Left, Text Right */}
+                {(textAboutMakers || image2) && (
+                    <div className="flex flex-col md:flex-row-reverse items-center gap-6">
+                        <div className="md:w-1/2 text-left md:text-right">
+                             <h3 className="text-xl md:text-2xl font-semibold mb-3 border-b-2 border-white/50 pb-2">Over de makers</h3>
+                            <div className="prose prose-invert max-w-none md:prose-lg">
+                                {renderTextWithLineBreaks(textAboutMakers)}
+                            </div>
+                        </div>
+                        {image2 && (
+                            <div className="md:w-1/2">
+                                <img src={image2} alt={`[Afbeelding van ${item.artist}]`} className="rounded-lg shadow-lg w-full h-auto object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {keywords && (
+                <div className="mt-8 pt-4 border-t border-white/30 max-w-4xl mx-auto">
+                    <p className="text-center text-gray-300 md:text-lg">
+                        <span className="font-semibold">Keywords:</span> {keywords}
+                    </p>
+                </div>
+            )}
+        </div>
+    );
+};
+
 
 const PopupModal = ({ showPopup, closePopup, popupContent, language, translations, speak }) => {
   if (!showPopup) return null;
@@ -1518,6 +1600,14 @@ const PopupModal = ({ showPopup, closePopup, popupContent, language, translation
       let textToSpeak = '';
       if (popupContent && popupContent.data) {
           switch(popupContent.type) {
+              case 'performance':
+                  const item = popupContent.data;
+                  const title = item.artist ? `${item.artist} - ${item.title}` : item.title;
+                  const credits = item.marketingCredits ? `Credits: ${item.marketingCredits}.` : '';
+                  const aboutPerf = (language === 'nl' ? item.marketingVoorstellingNL : item.marketingVoorstellingENG) || '';
+                  const aboutMakers = (language === 'nl' ? item.marketingBioNL : item.marketingBioENG) || '';
+                  textToSpeak = `${title}. ${credits} Over de voorstelling: ${aboutPerf}. Over de makers: ${aboutMakers}.`;
+                  break;
               case 'text':
                   textToSpeak = `${popupContent.data.title}. ${popupContent.data.text.replace(/\*\*/g, '')}`;
                   break;
@@ -1545,6 +1635,8 @@ const PopupModal = ({ showPopup, closePopup, popupContent, language, translation
     }
 
     switch (popupContent.type) {
+      case 'performance':
+        return <PerformanceDetailPopup item={popupContent.data} language={language} />;
       case 'iframe':
         return (
           <iframe
@@ -1585,7 +1677,7 @@ const PopupModal = ({ showPopup, closePopup, popupContent, language, translation
     }
   };
 
-  const showReadAloudButton = popupContent.type === 'text' || popupContent.type === 'calmRouteInfo' || popupContent.type === 'image';
+  const showReadAloudButton = popupContent.type === 'text' || popupContent.type === 'calmRouteInfo' || popupContent.type === 'image' || popupContent.type === 'performance';
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[90]">
@@ -1939,6 +2031,7 @@ const AppFooter = ({ logos, language, translations }) => {
         </footer>
     );
 };
+
 
 // De hoofdcomponent van de app
 const AppContent = () => {
@@ -2610,6 +2703,7 @@ const AppContent = () => {
 
   const handleLanguageChange = () => setLanguage(prev => prev === 'nl' ? 'en' : 'nl');
 
+  // ========= WIJZIGING: Data ophalen en verwerken aangepast =========
   const fetchDataFromAppwrite = useCallback(async () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 20000);
@@ -2631,9 +2725,10 @@ const AppContent = () => {
             return documents;
         };
 
+        // Haal alle benodigde data op, inclusief de nieuwe Marketing collectie
         const [
             companies, performances, locations, executions,
-            eventsData, sponsors, news, info, accessibility
+            eventsData, sponsors, news, info, accessibility, marketing
         ] = await Promise.all([
             fetchAllDocuments(APPWRITE_CONFIG.collections.companies),
             fetchAllDocuments(APPWRITE_CONFIG.collections.performances),
@@ -2643,19 +2738,26 @@ const AppContent = () => {
             fetchAllDocuments(APPWRITE_CONFIG.collections.sponsors),
             fetchAllDocuments(APPWRITE_CONFIG.collections.news),
             fetchAllDocuments(APPWRITE_CONFIG.collections.info),
-            fetchAllDocuments(APPWRITE_CONFIG.collections.toegankelijkheid)
+            fetchAllDocuments(APPWRITE_CONFIG.collections.toegankelijkheid),
+            // BELANGRIJK: Voeg 'marketing: '689e0665000be7c7c1a5'' toe aan de APPWRITE_CONFIG in react-app-1
+            fetchAllDocuments(APPWRITE_CONFIG.collections.marketing) 
         ]);
         clearTimeout(timeoutId);
 
+        // Maak Maps voor snelle toegang tot data
         const companiesMap = new Map(companies.map(c => [c.$id, c]));
         const performancesMap = new Map(performances.map(p => [p.$id, p]));
         const locationsMap = new Map(locations.map(l => [l.$id, l]));
         const executionsMap = new Map(executions.map(e => [e.$id, e]));
+        const marketingMap = new Map(marketing.map(m => [m.PerformanceId, m]));
 
         const localEventInfoMap = {};
         let allParsedData = [];
 
-        for (const eventDoc of eventsData) {
+        // Filter events op basis van het 'InApp' attribuut
+        const eventsInApp = eventsData.filter(event => event.InApp === true);
+
+        for (const eventDoc of eventsInApp) {
             localEventInfoMap[eventDoc.Name] = { 
                 mapUrl: eventDoc.mapUrl,
                 sponsorLogo: eventDoc.sponsorLogoUrl,
@@ -2675,6 +2777,8 @@ const AppContent = () => {
                 const locationData = locationsMap.get(execution.locationId);
                 if (!locationData) continue;
 
+                // Haal marketinginformatie op voor deze voorstelling
+                const marketingInfo = marketingMap.get(performance.$id);
 
                 const dateTime = new Date(execution.DateTime);
                 if (isNaN(dateTime.getTime())) continue;
@@ -2687,6 +2791,7 @@ const AppContent = () => {
                     localEventInfoMap[eventDoc.Name].dateString = eventDate;
                 }
 
+                // Voeg de samengestelde data, inclusief marketing info, toe aan de lijst
                 allParsedData.push({
                     id: execution.$id,
                     date: eventDate,
@@ -2713,27 +2818,25 @@ const AppContent = () => {
                         diningFacility: locationData.hasDining || false,
                         hasNGT: execution.hasNgt || false,
                     },
+                    // Nieuwe marketing data velden
+                    marketingCredits: marketingInfo?.Credits || null,
+                    marketingVoorstellingNL: marketingInfo?.VoorstellingstekstNL || null,
+                    marketingVoorstellingENG: marketingInfo?.VoorstellingstekstENG || null,
+                    marketingBioNL: marketingInfo?.BioNL || null,
+                    marketingBioENG: marketingInfo?.BioENG || null,
+                    marketingAfbeelding1: marketingInfo?.Afbeelding1 || null,
+                    marketingAfbeelding2: marketingInfo?.Afbeelding2 || null,
+                    marketingKeywords: marketingInfo?.Keywords || null,
                 });
             }
         }
         
-        const now = new Date();
-        const cutoffTime = new Date(now.getTime() - 45 * 60 * 1000);
+        // De logica om events met voorstellingen in het verleden te verbergen is verwijderd
+        // conform de instructie "in plaats van". Nu worden alle events met InApp=true getoond.
+        const filteredDataForDisplay = allParsedData;
         
-        const eventsWithFuturePerformances = new Set();
-        allParsedData.forEach(item => {
-            const perfDate = parseDateForSorting(item.date);
-            if(isNaN(perfDate.getTime())) return;
-            const [h, m] = item.time.split(':');
-            perfDate.setHours(h, m, 0, 0);
-            if (perfDate >= cutoffTime) {
-                eventsWithFuturePerformances.add(item.event);
-            }
-        });
-
-        const filteredDataForDisplay = allParsedData.filter(item => eventsWithFuturePerformances.has(item.event));
         const uniqueEventsForDisplay = Object.keys(localEventInfoMap)
-            .filter(eventName => eventsWithFuturePerformances.has(eventName))
+            .filter(eventName => eventsInApp.some(e => e.Name === eventName))
             .sort((a,b) => (parseDateForSorting(localEventInfoMap[a]?.dateString) || 0) - (parseDateForSorting(localEventInfoMap[b]?.dateString) || 0));
 
         const tempGeneralInfoItems = info.map(item => ({
@@ -3318,22 +3421,6 @@ const AppContent = () => {
         <div className={`transition-opacity duration-300 ${isContentVisible ? 'opacity-100' : 'opacity-0'}`}>
           {(selectedEvent || isFavorites || isFriendsFavorites) && (
               <>
-                {/* ========= WIJZIGING: Nudges hier geplaatst voor correcte zichtbaarheid ========= */}
-                <SearchFilterNudges
-                    searchTerm={searchTerm}
-                    setSearchTerm={setSearchTerm}
-                    genreFilters={genreFilters}
-                    setGenreFilters={setGenreFilters}
-                    allGenres={allGenres}
-                    iconFilters={iconFilters}
-                    setIconFilters={setIconFilters}
-                    filterScope={filterScope}
-                    setFilterScope={setFilterScope}
-                    safetyIcons={safetyIcons}
-                    language={language}
-                    translations={translations}
-                />
-              
                 {currentView === 'friends-favorites' && friendsFavorites.size > 0 ? (
                     <div className="flex flex-col items-center justify-center mt-12 mb-8 text-center">
                         <button 
@@ -3534,6 +3621,24 @@ const AppContent = () => {
         translations={translations[language]}
       />
       
+      {/* ========= WIJZIGING: Nudges hier geplaatst voor correcte positionering ========= */}
+      {!isInitialLoad && (
+        <SearchFilterNudges
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            genreFilters={genreFilters}
+            setGenreFilters={setGenreFilters}
+            allGenres={allGenres}
+            iconFilters={iconFilters}
+            setIconFilters={setIconFilters}
+            filterScope={filterScope}
+            setFilterScope={setFilterScope}
+            safetyIcons={safetyIcons}
+            language={language}
+            translations={translations}
+        />
+      )}
+
       <AccessibilityNudge 
           language={language} 
           translations={translations} 
