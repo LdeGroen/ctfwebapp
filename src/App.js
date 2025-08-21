@@ -2216,6 +2216,8 @@ const CookieConsentPopup = ({ onAcceptAll, onAcceptFunctional, onDecline, langua
   );
 };
 
+
+
 // De hoofdcomponent van de app
 const AppContent = () => {
   const [timetableData, setTimetableData] = useState([]);
@@ -2276,7 +2278,6 @@ const AppContent = () => {
 
   const safetyIcons = useMemo(() => getSafetyIcons(translations, language), [language]);
   
-  // ========= WIJZIGING: 'translations' verwijderd uit dependency array =========
   const allGenres = useMemo(() => {
     const genreKeys = new Set();
     const relevantData = selectedEvent 
@@ -2293,7 +2294,7 @@ const AppContent = () => {
         key: key,
         label: translations[language].genres[key] || key
     })).sort((a, b) => a.label.localeCompare(b.label));
-  }, [timetableData, selectedEvent, language]);
+  }, [timetableData, selectedEvent, language, translations]);
 
   useEffect(() => {
     setGenreFilters(new Set());
@@ -2405,7 +2406,7 @@ const AppContent = () => {
         items: groupedByDate[date].sort((a, b) => selectedDate === 'all-performances' ? a.title.localeCompare(b.title) : a.time.localeCompare(b.time))
       }))
     }];
-  }, [searchTerm, currentView, selectedEvent, selectedDate, timetableData, favorites, friendsFavorites, language, eventInfoMap, iconFilters, genreFilters, filterScope]);
+  }, [searchTerm, currentView, selectedEvent, selectedDate, timetableData, favorites, friendsFavorites, language, translations, eventInfoMap, iconFilters, genreFilters, filterScope]);
 
   const favoritesDataForExport = useMemo(() => {
     const favoriteItems = timetableData.filter(item => favorites.has(item.id));
@@ -2521,7 +2522,7 @@ const AppContent = () => {
         }
     }
     speak(textToSpeak, language);
-  }, [isInitialLoad, language, uniqueEvents, friendsFavorites, currentView, selectedEvent, selectedDate, formattedData, searchTerm, speak, generalInfoData, accessibilityInfoData, newsData]);
+  }, [isInitialLoad, language, uniqueEvents, friendsFavorites, currentView, selectedEvent, selectedDate, formattedData, searchTerm, speak, generalInfoData, accessibilityInfoData, newsData, translations]);
 
 
   const handleAnimatedUpdate = useCallback((updateFunction) => {
@@ -2594,7 +2595,7 @@ const AppContent = () => {
       } finally {
           document.body.style.backgroundColor = originalBodyColor;
       }
-  }, [language, showMessageBox]);
+  }, [language, showMessageBox, translations]);
 
   const handleExport = useCallback(async (type) => {
     if (type === 'link') {
@@ -2629,7 +2630,7 @@ const AppContent = () => {
     } else if (type === 'image') {
         setExportConfig({ type: favoritesViewMode });
     }
-  }, [favorites, language, showMessageBox, favoritesViewMode, timetableData]);
+  }, [favorites, language, showMessageBox, favoritesViewMode, timetableData, translations]);
 
   useEffect(() => {
     if (!exportConfig) return;
@@ -2655,7 +2656,7 @@ const AppContent = () => {
     };
 
     doExport();
-  }, [exportConfig, generateAndShareImage, language, showMessageBox]);
+  }, [exportConfig, generateAndShareImage, language, showMessageBox, translations]);
 
 
   useEffect(() => {
@@ -2876,14 +2877,24 @@ const AppContent = () => {
     });
   }, [accessibilitySettings, isInitialLoad]);
 
-  // ========= WIJZIGING: Dependency array aangepast naar [] =========
+  // Effect hook for cleanup on component unmount.
   useEffect(() => {
+    // The returned function is a cleanup function that React will run
+    // when the component is unmounted.
     return () => {
-      Object.values(notificationTimeouts.current).forEach(clearTimeout);
+      // On cleanup, we access the *current* value of the timeouts ref
+      // and clear every scheduled timeout to prevent memory leaks.
+      const timeouts = notificationTimeouts.current;
+      Object.values(timeouts).forEach(clearTimeout);
+      // We also stop any text-to-speech that might be active.
       stopSpeaking();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); 
+    // OPGELOST: De Netlify build-fout werd veroorzaakt door de 'exhaustive-deps'
+    // linting-regel. Door de stabiele dependencies `stopSpeaking` (een useCallback)
+    // en `notificationTimeouts` (een useRef) hier op te nemen, is de linter
+    // tevreden en wordt de fout opgelost zonder de werking te veranderen,
+    // aangezien deze dependencies niet veranderen tijdens de levenscyclus van de component.
+  }, [stopSpeaking, notificationTimeouts]);
 
   useEffect(() => {
     try {
@@ -3084,7 +3095,7 @@ const AppContent = () => {
         }
         return { generalInfo: [], timetable: timetableData };
     }
-  }, [language, timetableData]);
+  }, [language, timetableData, translations]);
 
   useEffect(() => {
     const init = async () => {
@@ -3215,7 +3226,7 @@ const AppContent = () => {
         ],
         translations[language].common.exactAlarmPermissionNeededTitle
       );
-  }, [language, showMessageBox, closeMessageBox, openSettingsWithFallback]);
+  }, [language, showMessageBox, closeMessageBox, openSettingsWithFallback, translations]);
 
   useEffect(() => {
     const checkPermissionsOnLoad = async () => {
@@ -3256,7 +3267,7 @@ const AppContent = () => {
     };
     const timer = setTimeout(checkPermissionsOnLoad, 1000);
     return () => clearTimeout(timer);
-  }, [loading, permissionRequestDismissed, language, showMessageBox, closeMessageBox, openSettingsWithFallback]);
+  }, [loading, permissionRequestDismissed, language, showMessageBox, closeMessageBox, openSettingsWithFallback, translations]);
 
   const scheduleActualNotification = useCallback(async (item) => {
     try {
@@ -3309,7 +3320,7 @@ const AppContent = () => {
     } catch (e) {
         console.error("Failed to schedule notification:", e);
     }
-  }, [language, showPermissionDialog, permissionRequestDismissed]);
+  }, [language, showPermissionDialog, permissionRequestDismissed, translations]);
 
   const cancelScheduledNotification = useCallback((performanceId) => {
     try {
@@ -3354,7 +3365,7 @@ const AppContent = () => {
     } catch (e) {
         console.error("Failed to schedule status notification:", e);
     }
-  }, [language]);
+  }, [language, translations]);
 
   useEffect(() => {
     if (loading || prevTimetableDataRef.current.length === 0 || favorites.size === 0) {
@@ -3452,7 +3463,7 @@ const AppContent = () => {
     } catch (e) {
         console.error("Failed to process general notifications:", e);
     }
-  }, [language, scheduledCustomNotifications, permissionRequestDismissed, showPermissionDialog]);
+  }, [language, scheduledCustomNotifications, permissionRequestDismissed, showPermissionDialog, translations]);
 
   useEffect(() => {
     const gistNotificationsUrl = 'https://ldegroen.github.io/ctf-notificaties/notifications.json'; 
