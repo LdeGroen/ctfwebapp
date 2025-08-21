@@ -2277,6 +2277,7 @@ const AppContent = () => {
 
   const safetyIcons = useMemo(() => getSafetyIcons(translations, language), [language]);
   
+  // ========= WIJZIGING: 'translations' verwijderd uit dependency array =========
   const allGenres = useMemo(() => {
     const genreKeys = new Set();
     const relevantData = selectedEvent 
@@ -2293,7 +2294,7 @@ const AppContent = () => {
         key: key,
         label: translations[language].genres[key] || key
     })).sort((a, b) => a.label.localeCompare(b.label));
-  }, [timetableData, selectedEvent, language, translations]);
+  }, [timetableData, selectedEvent, language]);
 
   useEffect(() => {
     setGenreFilters(new Set());
@@ -2688,7 +2689,6 @@ const AppContent = () => {
       });
   }, [handleAnimatedUpdate]);
   
-  // ========= WIJZIGING: Logica aangepast om de eerste toekomstige datum te selecteren =========
   const handleViewChange = useCallback((view, event = null) => {
     handleAnimatedUpdate(() => {
         let hash = '#';
@@ -2877,14 +2877,14 @@ const AppContent = () => {
     });
   }, [accessibilitySettings, isInitialLoad]);
 
-
+  // ========= WIJZIGING: Dependency array aangepast naar [] =========
   useEffect(() => {
     return () => {
       Object.values(notificationTimeouts.current).forEach(clearTimeout);
       stopSpeaking();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stopSpeaking]); 
+  }, []); 
 
   useEffect(() => {
     try {
