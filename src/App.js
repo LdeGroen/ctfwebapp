@@ -600,7 +600,7 @@ const AppHeader = ({ titleRef, translations, language }) => (
   </div>
 );
 
-// ========= WIJZIGING: StickyHeader bijgewerkt voor Open Call =========
+// ========= WIJZIGING: StickyHeader bijgewerkt voor Open Call en toegankelijkheid =========
 const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavoritesClick, handleFriendsFavoritesClick, handleMoreInfoClick, hasFriendsFavorites, selectedEvent, currentView, language, handleLanguageChange, translations, onLogoClick, onReadPage, openContentPopup, isInitialLoad, openCallItems = [], onOpenCallSelect }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -656,17 +656,17 @@ const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavorit
                             {isDropdownOpen && (
                                 <div className="origin-top-right absolute right-1/2 translate-x-1/2 mt-2 w-56 rounded-md shadow-lg bg-[#1a5b64] ring-1 ring-black ring-opacity-5 focus:outline-none">
                                     <div className="py-1" role="menu" aria-orientation="vertical">
-                                        {uniqueEvents.map(event => (<a href="#" key={event} onClick={(e) => { e.preventDefault(); handleEventClick(event); setIsDropdownOpen(false); }} className="block px-4 py-2 text-sm text-white hover:bg-[#20747f] text-center" role="menuitem">{event}</a>))}
+                                        {uniqueEvents.map(event => (<button key={event} onClick={() => { handleEventClick(event); setIsDropdownOpen(false); }} className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-[#20747f] text-center" role="menuitem">{event}</button>))}
                                         <div className="border-t border-white/20 my-1"></div>
-                                        <a href="#" onClick={(e) => { e.preventDefault(); handleFavoritesClick(); setIsDropdownOpen(false); }} className="block px-4 py-2 text-sm text-white hover:bg-[#20747f] text-center" role="menuitem">{translations[language].common.favorites}</a>
-                                        {hasFriendsFavorites && <a href="#" onClick={(e) => { e.preventDefault(); handleFriendsFavoritesClick(); setIsDropdownOpen(false); }} className="block px-4 py-2 text-sm text-white hover:bg-[#20747f] text-center" role="menuitem">{translations[language].common.friendsFavorites}</a>}
+                                        <button onClick={() => { handleFavoritesClick(); setIsDropdownOpen(false); }} className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-[#20747f] text-center" role="menuitem">{translations[language].common.favorites}</button>
+                                        {hasFriendsFavorites && <button onClick={() => { handleFriendsFavoritesClick(); setIsDropdownOpen(false); }} className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-[#20747f] text-center" role="menuitem">{translations[language].common.friendsFavorites}</button>}
                                         <div className="border-t border-white/20 my-1"></div>
-                                        <a href="#" onClick={(e) => { e.preventDefault(); handleMoreInfoClick(); setIsDropdownOpen(false); }} className="block px-4 py-2 text-sm text-white hover:bg-[#20747f] text-center" role="menuitem">{translations[language].common.moreInfo}</a>
+                                        <button onClick={() => { handleMoreInfoClick(); setIsDropdownOpen(false); }} className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-[#20747f] text-center" role="menuitem">{translations[language].common.moreInfo}</button>
                                         {/* TOEGEVOEGD: Voeg Open Call items toe aan de dropdown */}
                                         {openCallItems.length > 0 && openCallItems.map(item => {
                                             const title = item.title[language] || item.title.nl;
                                             return (
-                                                <a href="#" key={title} onClick={(e) => { e.preventDefault(); onOpenCallSelect(item); setIsDropdownOpen(false); }} className="block px-4 py-2 text-sm text-white hover:bg-[#20747f] text-center" role="menuitem">{title}</a>
+                                                <button key={title} onClick={() => { onOpenCallSelect(item); setIsDropdownOpen(false); }} className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-[#20747f] text-center" role="menuitem">{title}</button>
                                             );
                                         })}
                                     </div>
@@ -1120,6 +1120,8 @@ const PerformanceCard = ({ item, favorites, toggleFavorite, addToGoogleCalendar,
         speak(textToSpeak, language);
     };
 
+    const LocationElement = item.googleMapsUrl ? 'a' : 'div';
+
     return (
         <div className={`text-gray-800 rounded-xl shadow-xl border border-gray-200 transition-all duration-300 flex flex-col relative w-full md:w-[384px] bg-white overflow-hidden ${isCancelled || isFull ? 'opacity-50' : 'hover:scale-105 hover:shadow-2xl cursor-pointer'}`} onClick={() => !isCancelled && !isFull && !isExportMode && openContentPopup('performance', item)}>
             {translatedGenre && (
@@ -1133,7 +1135,14 @@ const PerformanceCard = ({ item, favorites, toggleFavorite, addToGoogleCalendar,
                 
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-2">
                     <h3 className="text-lg md:text-xl font-semibold text-[#20747f] mb-1 sm:mb-0 sm:mr-4 flex-grow">{fullTitle}</h3>
-                    <a href={item.googleMapsUrl || '#'} target="_blank" rel="noopener noreferrer" onClick={(e) => { if (!item.googleMapsUrl || isExportMode) e.preventDefault(); e.stopPropagation(); }} className={`flex items-center text-md md:text-lg font-semibold text-gray-600 flex-shrink-0 text-right ${item.googleMapsUrl && !isExportMode ? 'hover:text-[#1a5b64] cursor-pointer' : 'cursor-default'} transition-colors duration-200`} title={item.googleMapsUrl ? translations[language].common.openLocationInGoogleMaps : ''}>
+                    <LocationElement 
+                      href={item.googleMapsUrl || undefined} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      onClick={(e) => { if (isExportMode) e.preventDefault(); e.stopPropagation(); }} 
+                      className={`flex items-center text-md md:text-lg font-semibold text-gray-600 flex-shrink-0 text-right ${item.googleMapsUrl && !isExportMode ? 'hover:text-[#1a5b64] cursor-pointer' : 'cursor-default'} transition-colors duration-200`} 
+                      title={item.googleMapsUrl ? translations[language].common.openLocationInGoogleMaps : ''}
+                    >
                         {item.location}
                         {item.googleMapsUrl && (
                             <span className="ml-1 text-[#20747f]">
@@ -1143,7 +1152,7 @@ const PerformanceCard = ({ item, favorites, toggleFavorite, addToGoogleCalendar,
                                 </svg>
                             </span>
                         )}
-                    </a>
+                    </LocationElement>
                 </div>
 
                 {item.artistImageUrl && (
@@ -2207,6 +2216,7 @@ const CookieConsentPopup = ({ onAcceptAll, onAcceptFunctional, onDecline, langua
   );
 };
 
+
 // De hoofdcomponent van de app
 const AppContent = () => {
   const [timetableData, setTimetableData] = useState([]);
@@ -2235,7 +2245,6 @@ const AppContent = () => {
   const [eventViewMode, setEventViewMode] = useState('card');
   const [favoritesViewMode, setFavoritesViewMode] = useState('card');
   const [friendsFavoritesViewMode, setFriendsFavoritesViewMode] = useState('card');
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [isContentVisible, setIsContentVisible] = useState(true);
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportConfig, setExportConfig] = useState(null);
@@ -2396,7 +2405,7 @@ const AppContent = () => {
         items: groupedByDate[date].sort((a, b) => selectedDate === 'all-performances' ? a.title.localeCompare(b.title) : a.time.localeCompare(b.time))
       }))
     }];
-  }, [searchTerm, currentView, selectedEvent, selectedDate, timetableData, favorites, friendsFavorites, language, translations, eventInfoMap, iconFilters, genreFilters, filterScope]);
+  }, [searchTerm, currentView, selectedEvent, selectedDate, timetableData, favorites, friendsFavorites, language, eventInfoMap, iconFilters, genreFilters, filterScope]);
 
   const favoritesDataForExport = useMemo(() => {
     const favoriteItems = timetableData.filter(item => favorites.has(item.id));
@@ -2512,7 +2521,7 @@ const AppContent = () => {
         }
     }
     speak(textToSpeak, language);
-  }, [isInitialLoad, translations, language, uniqueEvents, friendsFavorites, currentView, selectedEvent, selectedDate, formattedData, searchTerm, speak, generalInfoData, accessibilityInfoData, newsData]);
+  }, [isInitialLoad, language, uniqueEvents, friendsFavorites, currentView, selectedEvent, selectedDate, formattedData, searchTerm, speak, generalInfoData, accessibilityInfoData, newsData]);
 
 
   const handleAnimatedUpdate = useCallback((updateFunction) => {
@@ -2585,7 +2594,7 @@ const AppContent = () => {
       } finally {
           document.body.style.backgroundColor = originalBodyColor;
       }
-  }, [language, translations, showMessageBox]);
+  }, [language, showMessageBox]);
 
   const handleExport = useCallback(async (type) => {
     if (type === 'link') {
@@ -2620,7 +2629,7 @@ const AppContent = () => {
     } else if (type === 'image') {
         setExportConfig({ type: favoritesViewMode });
     }
-  }, [favorites, language, translations, showMessageBox, favoritesViewMode, timetableData]);
+  }, [favorites, language, showMessageBox, favoritesViewMode, timetableData]);
 
   useEffect(() => {
     if (!exportConfig) return;
@@ -2646,7 +2655,7 @@ const AppContent = () => {
     };
 
     doExport();
-  }, [exportConfig, generateAndShareImage, language, translations, showMessageBox]);
+  }, [exportConfig, generateAndShareImage, language, showMessageBox]);
 
 
   useEffect(() => {
@@ -2874,6 +2883,7 @@ const AppContent = () => {
       Object.values(notificationTimeouts.current).forEach(clearTimeout);
       stopSpeaking();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stopSpeaking]); 
 
   useEffect(() => {
@@ -3075,7 +3085,7 @@ const AppContent = () => {
         }
         return { generalInfo: [], timetable: timetableData };
     }
-  }, [language, translations, timetableData]);
+  }, [language, timetableData]);
 
   useEffect(() => {
     const init = async () => {
@@ -3206,7 +3216,7 @@ const AppContent = () => {
         ],
         translations[language].common.exactAlarmPermissionNeededTitle
       );
-  }, [language, translations, showMessageBox, closeMessageBox, openSettingsWithFallback]);
+  }, [language, showMessageBox, closeMessageBox, openSettingsWithFallback]);
 
   useEffect(() => {
     const checkPermissionsOnLoad = async () => {
@@ -3247,7 +3257,7 @@ const AppContent = () => {
     };
     const timer = setTimeout(checkPermissionsOnLoad, 1000);
     return () => clearTimeout(timer);
-  }, [loading, permissionRequestDismissed, language, translations, showMessageBox, closeMessageBox, openSettingsWithFallback]);
+  }, [loading, permissionRequestDismissed, language, showMessageBox, closeMessageBox, openSettingsWithFallback]);
 
   const scheduleActualNotification = useCallback(async (item) => {
     try {
@@ -3300,7 +3310,7 @@ const AppContent = () => {
     } catch (e) {
         console.error("Failed to schedule notification:", e);
     }
-  }, [language, translations, showPermissionDialog, permissionRequestDismissed]);
+  }, [language, showPermissionDialog, permissionRequestDismissed]);
 
   const cancelScheduledNotification = useCallback((performanceId) => {
     try {
@@ -3345,7 +3355,7 @@ const AppContent = () => {
     } catch (e) {
         console.error("Failed to schedule status notification:", e);
     }
-  }, [language, translations]);
+  }, [language]);
 
   useEffect(() => {
     if (loading || prevTimetableDataRef.current.length === 0 || favorites.size === 0) {
@@ -3443,7 +3453,7 @@ const AppContent = () => {
     } catch (e) {
         console.error("Failed to process general notifications:", e);
     }
-  }, [language, translations, scheduledCustomNotifications, permissionRequestDismissed, showPermissionDialog]);
+  }, [language, scheduledCustomNotifications, permissionRequestDismissed, showPermissionDialog]);
 
   useEffect(() => {
     const gistNotificationsUrl = 'https://ldegroen.github.io/ctf-notificaties/notifications.json'; 
