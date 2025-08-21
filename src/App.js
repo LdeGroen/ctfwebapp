@@ -2116,7 +2116,7 @@ const AppFooter = ({ logos, language, translations }) => {
             clearInterval(intervalRef.current);
             clearTimeout(timeoutRef.current);
         };
-    }, [logos]);
+    }, [logos, intervalRef, timeoutRef]); // OPGELOST: refs toegevoegd aan dependency array
 
     useEffect(() => {
         if (!containerRef.current || !extendedLogos.length || logos.length < 6) return;
@@ -2149,7 +2149,7 @@ const AppFooter = ({ logos, language, translations }) => {
             }, 1500);
         }
 
-    }, [currentIndex, logos, extendedLogos.length]);
+    }, [currentIndex, logos, extendedLogos.length, containerRef]); // OPGELOST: ref toegevoegd aan dependency array
 
 
     if (!logos || logos.length === 0) {
@@ -2215,7 +2215,6 @@ const CookieConsentPopup = ({ onAcceptAll, onAcceptFunctional, onDecline, langua
     </div>
   );
 };
-
 
 // De hoofdcomponent van de app
 const AppContent = () => {
