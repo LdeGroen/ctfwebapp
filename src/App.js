@@ -16,11 +16,10 @@ const APPWRITE_CONFIG = {
         sponsors: '68948b97003e5aa5068c',
         info: '68945b4f000e7c3880cb',
         toegankelijkheid: '6894d367002bf2645148',
-        marketing: '689ded8900383f2d618b', // TOEGEVOEGD: Marketing collectie ID
+        marketing: '689ded8900383f2d618b', 
     }
 };
 
-// ========= Error Boundary Component =========
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -219,6 +218,13 @@ const translations = {
       footerText: 'Het Café Theater Festival wordt mede mogelijk gemaakt door haar partners en begunstigers:',
       back: 'Terug'
     },
+    cookiePopup: {
+      title: 'Wij gebruiken cookies',
+      text: 'Deze website gebruikt cookies om uw ervaring te verbeteren, de prestaties te analyseren en marketing te personaliseren. Door op "Alles accepteren" te klikken, gaat u akkoord met het gebruik van alle cookies. U kunt uw voorkeuren aanpassen door op "Alleen functioneel" te klikken of alle niet-essentiële cookies te weigeren met "Weigeren".',
+      acceptAll: 'Alles accepteren',
+      acceptFunctional: 'Alleen functioneel',
+      decline: 'Weigeren'
+    },
     genres: {
         'Muziektheater': 'Muziektheater', 'Dans': 'Dans', 'Theater': 'Theater',
         'Fysiek theater': 'Fysiek theater', 'Locatietheater': 'Locatietheater',
@@ -316,6 +322,13 @@ const translations = {
       footerText: 'The Café Theater Festival is made possible by its partners and benefactors:',
       back: 'Back'
     },
+    cookiePopup: {
+      title: 'We use cookies',
+      text: 'This website uses cookies to enhance your experience, analyze performance, and personalize marketing. By clicking "Accept All", you agree to the use of all cookies. You can adjust your preferences by clicking "Functional Only" or decline all non-essential cookies with "Decline".',
+      acceptAll: 'Accept All',
+      acceptFunctional: 'Functional Only',
+      decline: 'Decline'
+    },
     genres: {
         'Muziektheater': 'Musical Theatre', 'Musical': 'Musical', 'Opera': 'Opera', 'Dans': 'Dance',
         'Club-stijl dans': 'Club-style Dance', 'Hip-hop dans': 'Hip-hop Dance', 'Theater': 'Theatre',
@@ -403,6 +416,80 @@ const renderGenericPopupText = (content) => {
       <p key={`p-${index}`} dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} className="mb-4 last:mb-0 text-white" />
   ));
   return elements;
+};
+
+// ========= WIJZIGING: Component voor opgemaakte tekst bijgewerkt =========
+const CustomTextRenderer = ({ text, imageUrl, title = 'Afbeelding', textColorClass = 'text-white' }) => {
+    if (!text) return null;
+
+    // Functie om hyperlinks, e-mailadressen en buttons te parsen
+    const parseLine = (line) => {
+        // Parse e-mailadressen
+        line = line.replace(
+            /(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)/g,
+            '<a href="mailto:$1" class="underline hover:text-blue-300" target="_blank" rel="noopener noreferrer">$1</a>'
+        );
+
+        // Parse hyperlinks zoals: woord [url]
+        line = line.replace(
+            /(\S+)\s*\[(https?:\/\/[^\s\]]+)\]/g,
+            '<a href="$2" class="underline hover:text-blue-300" target="_blank" rel="noopener noreferrer">$1</a>'
+        );
+        
+        // Parse hyperlinks waarbij de tekst de URL zelf is: [url]
+        line = line.replace(
+            /\[(https?:\/\/[^\s\]]+)\]/g,
+            '<a href="$1" class="underline hover:text-blue-300" target="_blank" rel="noopener noreferrer">$1</a>'
+        );
+
+        // NIEUW: Parse buttons [button:titel:url]
+        line = line.replace(
+            /\[button:(.*?):(https?:\/\/[^\s\]]+)\]/g,
+            '<a href="$2" target="_blank" rel="noopener noreferrer" class="inline-block bg-[#2e9aaa] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#20747f] transition-colors no-underline">$1</a>'
+        );
+
+        return line;
+    };
+
+    // Splits de tekst in regels en maak voor elke regel het juiste HTML-element
+    const elements = text.split('\n').map((line, index) => {
+        let content = line.trim();
+        
+        if (content.endsWith('[h1]')) {
+            const parsedContent = parseLine(content.slice(0, -4).trim());
+            return <h1 key={index} className={`text-3xl font-bold mb-4 ${textColorClass}`} dangerouslySetInnerHTML={{ __html: parsedContent }} />;
+        }
+        if (content.endsWith('[h2]')) {
+            const parsedContent = parseLine(content.slice(0, -4).trim());
+            return <h2 key={index} className={`text-2xl font-bold mb-3 ${textColorClass}`} dangerouslySetInnerHTML={{ __html: parsedContent }} />;
+        }
+        if (content.endsWith('[h3]')) {
+            const parsedContent = parseLine(content.slice(0, -4).trim());
+            return <h3 key={index} className={`text-xl font-bold mb-2 ${textColorClass}`} dangerouslySetInnerHTML={{ __html: parsedContent }} />;
+        }
+        
+        if (content === '') {
+            return <br key={index} />;
+        }
+
+        const parsedContent = parseLine(content);
+        return <p key={index} className={`mb-4 ${textColorClass}`} dangerouslySetInnerHTML={{ __html: parsedContent }} />;
+    });
+
+    return (
+        <div className="prose prose-invert max-w-none">
+            {/* WIJZIGING: Afbeelding bovenaan tonen met aangepaste hoogte */}
+            {imageUrl && (
+                <img 
+                    src={imageUrl} 
+                    alt={`[Afbeelding van ${title}]`}
+                    className="rounded-lg shadow-lg w-full h-72 object-cover mb-6"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                />
+            )}
+            {elements}
+        </div>
+    );
 };
 
 
@@ -513,7 +600,8 @@ const AppHeader = ({ titleRef, translations, language }) => (
   </div>
 );
 
-const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavoritesClick, handleFriendsFavoritesClick, handleMoreInfoClick, hasFriendsFavorites, selectedEvent, currentView, language, handleLanguageChange, translations, onLogoClick, onReadPage, openContentPopup, isInitialLoad }) => {
+// ========= WIJZIGING: StickyHeader bijgewerkt voor Open Call =========
+const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavoritesClick, handleFriendsFavoritesClick, handleMoreInfoClick, hasFriendsFavorites, selectedEvent, currentView, language, handleLanguageChange, translations, onLogoClick, onReadPage, openContentPopup, isInitialLoad, openCallItems = [], onOpenCallSelect }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
     
@@ -540,7 +628,7 @@ const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavorit
                            <>
                                <img onClick={onLogoClick} className="h-16 w-auto cursor-pointer" src="https://cafetheaterfestival.nl/wp-content/uploads/2025/06/fav-wit-1.png" alt="[Afbeelding van CTF Logo Favicon]"/>
                                <button 
-                                    onClick={() => openContentPopup('iframe', 'https://form.jotform.com/223333761374051')} 
+                                    onClick={() => openContentPopup('iframe', 'https://ldegroen.github.io/Stamgastenformulier/')} 
                                     className="px-4 py-2 rounded-lg font-semibold bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50 transition-colors duration-200 text-sm"
                                 >
                                     <span className="hidden sm:inline">{translations[language].common.becomeRegularGuest}</span>
@@ -574,6 +662,13 @@ const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavorit
                                         {hasFriendsFavorites && <a href="#" onClick={(e) => { e.preventDefault(); handleFriendsFavoritesClick(); setIsDropdownOpen(false); }} className="block px-4 py-2 text-sm text-white hover:bg-[#20747f] text-center" role="menuitem">{translations[language].common.friendsFavorites}</a>}
                                         <div className="border-t border-white/20 my-1"></div>
                                         <a href="#" onClick={(e) => { e.preventDefault(); handleMoreInfoClick(); setIsDropdownOpen(false); }} className="block px-4 py-2 text-sm text-white hover:bg-[#20747f] text-center" role="menuitem">{translations[language].common.moreInfo}</a>
+                                        {/* TOEGEVOEGD: Voeg Open Call items toe aan de dropdown */}
+                                        {openCallItems.length > 0 && openCallItems.map(item => {
+                                            const title = item.title[language] || item.title.nl;
+                                            return (
+                                                <a href="#" key={title} onClick={(e) => { e.preventDefault(); onOpenCallSelect(item); setIsDropdownOpen(false); }} className="block px-4 py-2 text-sm text-white hover:bg-[#20747f] text-center" role="menuitem">{title}</a>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
@@ -591,17 +686,27 @@ const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavorit
     );
 };
 
-
-const EventNavigation = ({ onEventSelect, onFavoritesSelect, onFriendsFavoritesSelect, onMoreInfoSelect, hasFriendsFavorites, uniqueEvents, language, translations }) => {
+// ========= WIJZIGING: EventNavigation bijgewerkt voor Open Call =========
+const EventNavigation = ({ onEventSelect, onFavoritesSelect, onFriendsFavoritesSelect, onMoreInfoSelect, hasFriendsFavorites, uniqueEvents, language, translations, openCallItems = [], onOpenCallSelect }) => {
     const eventButtons = uniqueEvents.map(event => (
         <button key={event} onClick={() => onEventSelect(event)} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{event}</button>
     ));
+
+    // TOEGEVOEGD: Genereer knoppen voor "Open Call" items
+    const openCallButtons = openCallItems.map(item => {
+        const title = item.title[language] || item.title.nl;
+        return (
+            <button key={title} onClick={() => onOpenCallSelect(item)} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{title}</button>
+        );
+    });
 
     const utilityButtons = (
         <>
             <button onClick={onFavoritesSelect} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{translations[language].common.favorites}</button>
             {hasFriendsFavorites && <button onClick={onFriendsFavoritesSelect} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{translations[language].common.friendsFavorites}</button>}
             <button onClick={onMoreInfoSelect} className="px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50">{translations[language].common.moreInfo}</button>
+            {/* TOEGEVOEGD: Toon de Open Call knoppen */}
+            {openCallButtons}
         </>
     );
 
@@ -616,6 +721,7 @@ const EventNavigation = ({ onEventSelect, onFavoritesSelect, onFriendsFavoritesS
         </div>
     );
 };
+
 
 const DateNavigation = ({ datesForCurrentSelectedEvent, selectedDate, setSelectedDate, setSearchTerm, translations, language, selectedEvent, timetableData }) => {
     const hasCalmRoutePerformances = useMemo(() => 
@@ -883,7 +989,7 @@ const SearchFilterNudges = ({
 
     const FilterIcon = () => (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6-414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
         </svg>
     );
 
@@ -1523,7 +1629,6 @@ const ZoomableImage = ({ src, alt }) => {
     );
 };
 
-// ========= WIJZIGING: Responsive tekstgrootte toegevoegd =========
 const PerformanceDetailPopup = ({ item, language }) => {
     const title = item.artist ? `${item.artist} - ${item.title}` : item.title;
     const credits = item.marketingCredits;
@@ -1546,7 +1651,6 @@ const PerformanceDetailPopup = ({ item, language }) => {
             {credits && <p className="text-center text-gray-300 mb-6 italic md:text-lg">{credits}</p>}
 
             <div className="space-y-8 max-w-4xl mx-auto">
-                {/* Block 1: Text Left, Image Right */}
                 {(textAboutPerformance || image1) && (
                     <div className="flex flex-col md:flex-row items-center gap-6">
                         <div className="md:w-1/2 text-left">
@@ -1563,7 +1667,6 @@ const PerformanceDetailPopup = ({ item, language }) => {
                     </div>
                 )}
 
-                {/* Block 2: Image Left, Text Right */}
                 {(textAboutMakers || image2) && (
                     <div className="flex flex-col md:flex-row-reverse items-center gap-6">
                         <div className="md:w-1/2 text-left md:text-right">
@@ -1593,6 +1696,7 @@ const PerformanceDetailPopup = ({ item, language }) => {
 };
 
 
+// ========= WIJZIGING: PopupModal bijgewerkt =========
 const PopupModal = ({ showPopup, closePopup, popupContent, language, translations, speak }) => {
   if (!showPopup) return null;
 
@@ -1610,6 +1714,14 @@ const PopupModal = ({ showPopup, closePopup, popupContent, language, translation
                   break;
               case 'text':
                   textToSpeak = `${popupContent.data.title}. ${popupContent.data.text.replace(/\*\*/g, '')}`;
+                  break;
+              case 'customText':
+                  // Verwijder de opmaakcodes voor het voorlezen
+                  textToSpeak = popupContent.data.text
+                      .replace(/\[h[1-3]\]/g, '. ')
+                      .replace(/(\S+)\s*\[(https?:\/\/[^\s\]]+)\]/g, '$1')
+                      .replace(/\[(https?:\/\/[^\s\]]+)\]/g, '$1')
+                      .replace(/\[button:(.*?):https?:\/\/[^\s\]]+\]/g, 'Knop: $1.'); // Button voorlezen
                   break;
               case 'calmRouteInfo':
                   textToSpeak = `${popupContent.data.title}. ${popupContent.data.text.replace(/\*\*/g, '')}`;
@@ -1653,6 +1765,16 @@ const PopupModal = ({ showPopup, closePopup, popupContent, language, translation
             {renderGenericPopupText(popupContent.data.text)}
           </div>
         );
+      case 'customText':
+        return (
+          <div className="overflow-y-auto flex-grow p-6">
+            <CustomTextRenderer 
+              text={popupContent.data.text} 
+              imageUrl={popupContent.data.imageUrl}
+              title={popupContent.data.title}
+            />
+          </div>
+        );
       case 'calmRouteInfo':
         return (
           <div className="overflow-y-auto flex-grow p-4">
@@ -1660,7 +1782,7 @@ const PopupModal = ({ showPopup, closePopup, popupContent, language, translation
             {renderGenericPopupText(popupContent.data.text)}
             {popupContent.data.button && (
               <button
-                onClick={() => window.open('https://form.jotform.com/223333761374051', '_blank')}
+                onClick={() => window.open('https://ldegroen.github.io/Stamgastenformulier/', '_blank')}
                 className="mt-4 px-6 py-3 bg-white text-[#20747f] rounded-lg shadow-md hover:bg-gray-100 transition-all duration-200 text-base font-semibold"
               >
                 {popupContent.data.button}
@@ -1677,7 +1799,7 @@ const PopupModal = ({ showPopup, closePopup, popupContent, language, translation
     }
   };
 
-  const showReadAloudButton = popupContent.type === 'text' || popupContent.type === 'calmRouteInfo' || popupContent.type === 'image' || popupContent.type === 'performance';
+  const showReadAloudButton = ['text', 'calmRouteInfo', 'image', 'performance', 'customText'].includes(popupContent.type);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[90]">
@@ -1832,6 +1954,7 @@ const OfflineIndicator = ({ isOffline, language, translations, onRetry }) => {
   );
 };
 
+// ========= WIJZIGING: MoreInfoPage bijgewerkt =========
 const MoreInfoPage = ({ generalInfoItems, accessibilityInfoItems, openContentPopup, language, translations }) => {
   const renderInfoSection = (title, items, showTitle = true) => {
     if (!items || items.length === 0) return null;
@@ -1841,17 +1964,27 @@ const MoreInfoPage = ({ generalInfoItems, accessibilityInfoItems, openContentPop
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
           {items.map((item, index) => {
             const itemTitle = item.title[language] || item.title.nl;
-            const itemUrl = item.url[language] || item.url.nl;
-            const itemImageUrl = item.imageUrl[language] || item.imageUrl.nl;
             
             return (
                 <div
                   key={index}
                   className="bg-white rounded-xl shadow-xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full md:w-[384px]"
-                  onClick={() => openContentPopup('iframe', itemUrl)}
+                  onClick={() => {
+                      const itemText = item.tekst?.[language] || item.tekst?.nl;
+                      if (item.weergave && itemText) {
+                          openContentPopup('customText', { 
+                              text: itemText,
+                              imageUrl: item.imageUrl, // Afbeelding URL doorgeven
+                              title: itemTitle // Titel doorgeven voor alt-tekst
+                          });
+                      } else {
+                          const itemUrl = item.url?.[language] || item.url?.nl;
+                          openContentPopup('iframe', itemUrl);
+                      }
+                  }}
                 >
                   <img
-                    src={itemImageUrl}
+                    src={item.imageUrl}
                     alt={`[Afbeelding van ${itemTitle}]`}
                     className="w-full h-48 object-cover"
                     onError={(e) => { e.target.src = 'https://placehold.co/600x400/20747f/FFFFFF?text=Afbeelding+niet+gevonden'; }}
@@ -1886,7 +2019,7 @@ const MoreInfoPage = ({ generalInfoItems, accessibilityInfoItems, openContentPop
 };
 
 
-// ========= WIJZIGING: Nieuwsitems zijn nu kleiner =========
+// ========= WIJZIGING: NewsPage bijgewerkt =========
 const NewsPage = ({ newsItems, openContentPopup, language, translations }) => {
   if (!newsItems || newsItems.length === 0) {
     return null;
@@ -1898,18 +2031,27 @@ const NewsPage = ({ newsItems, openContentPopup, language, translations }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
         {newsItems.map((item, index) => {
           const itemTitle = item.title[language] || item.title.nl;
-          const itemUrl = item.url[language] || item.url.nl;
-          const itemImageUrl = item.imageUrl[language] || item.imageUrl.nl;
 
           return (
             <div
               key={index}
-              // De breedte is hier aangepast van md:w-[384px] naar md:w-[340px]
               className="bg-white rounded-xl shadow-xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full md:w-[340px]"
-              onClick={() => openContentPopup('iframe', itemUrl)}
+              onClick={() => {
+                  const itemText = item.tekst?.[language] || item.tekst?.nl;
+                  if (item.weergave && itemText) {
+                      openContentPopup('customText', { 
+                          text: itemText,
+                          imageUrl: item.imageUrl, // Afbeelding URL doorgeven
+                          title: itemTitle // Titel doorgeven voor alt-tekst
+                      });
+                  } else {
+                      const itemUrl = item.url?.[language] || item.url?.nl;
+                      openContentPopup('iframe', itemUrl);
+                  }
+              }}
             >
               <img
-                src={itemImageUrl}
+                src={item.imageUrl}
                 alt={`[Afbeelding van ${itemTitle}]`}
                 className="w-full h-48 object-cover"
                 onError={(e) => { e.target.src = 'https://placehold.co/600x400/20747f/FFFFFF?text=Afbeelding+niet+gevonden'; }}
@@ -1940,7 +2082,6 @@ const ScrollDownButton = ({ onClick, translations, language }) => (
 );
 
 
-// ========= WIJZIGING: Logo's terug naar oorspronkelijke grootte =========
 const AppFooter = ({ logos, language, translations }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const containerRef = useRef(null);
@@ -2013,7 +2154,6 @@ const AppFooter = ({ logos, language, translations }) => {
                 <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#20747f] via-transparent to-[#20747f] z-10 pointer-events-none"></div>
                 <div className="flex" ref={containerRef}>
                     {extendedLogos.map((logo, index) => (
-                        // De breedte en marge zijn hier teruggezet naar een grotere waarde
                         <div key={index} className="group relative flex-shrink-0 h-20 w-48 flex items-center justify-center mx-8">
                             <img 
                                 src={logo.url} 
@@ -2032,6 +2172,40 @@ const AppFooter = ({ logos, language, translations }) => {
     );
 };
 
+const CookieConsentPopup = ({ onAcceptAll, onAcceptFunctional, onDecline, language, translations }) => {
+  const t = translations[language].cookiePopup;
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 bg-black bg-opacity-80 backdrop-blur-sm p-4 z-[100] text-white shadow-lg animate-fade-in">
+      <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="text-center md:text-left">
+          <h3 className="font-bold text-lg mb-1">{t.title}</h3>
+          <p className="text-sm text-gray-300">{t.text}</p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
+          <button 
+            onClick={onAcceptAll} 
+            className="px-5 py-2 rounded-lg font-semibold bg-[#2e9aaa] hover:bg-[#20747f] transition-colors duration-200"
+          >
+            {t.acceptAll}
+          </button>
+          <button 
+            onClick={onAcceptFunctional}
+            className="px-5 py-2 rounded-lg font-semibold bg-white/20 hover:bg-white/30 transition-colors duration-200"
+          >
+            {t.acceptFunctional}
+          </button>
+          <button 
+            onClick={onDecline}
+            className="px-5 py-2 rounded-lg font-semibold bg-transparent hover:bg-white/10 transition-colors duration-200"
+          >
+            {t.decline}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // De hoofdcomponent van de app
 const AppContent = () => {
@@ -2081,6 +2255,8 @@ const AppContent = () => {
   const [accessibilityInfoData, setAccessibilityInfoData] = useState([]);
   const [newsData, setNewsData] = useState([]);
   const [benefactorLogos, setBenefactorLogos] = useState([]);
+  const [cookieConsent, setCookieConsent] = useState(null);
+  const [openCallItems, setOpenCallItems] = useState([]);
   
   const newsSectionRef = useRef(null);
   const titleRef = useRef(null);
@@ -2494,7 +2670,8 @@ const AppContent = () => {
         setSearchTerm('');
         setShowStickyHeader(false);
         try {
-          window.history.pushState({ view: 'initial' }, '', window.location.pathname + '#');
+          const base = window.location.pathname.replace(/\/opencall$/, '');
+          window.history.pushState({ view: 'initial' }, '', base + '#');
         } catch (e) {
           console.warn("Could not update history state:", e);
         }
@@ -2502,6 +2679,7 @@ const AppContent = () => {
       });
   }, [handleAnimatedUpdate]);
   
+  // ========= WIJZIGING: Logica aangepast om de eerste toekomstige datum te selecteren =========
   const handleViewChange = useCallback((view, event = null) => {
     handleAnimatedUpdate(() => {
         let hash = '#';
@@ -2510,7 +2688,7 @@ const AppContent = () => {
         else if (view === 'friends-favorites') hash = '#friends-favorites';
         else if (view === 'more-info') hash = '#more-info';
 
-        const newUrl = window.location.pathname + hash;
+        const newUrl = window.location.pathname.replace(/\/opencall$/, '') + hash;
         const state = { view: 'detail', event, viewMode: 'card', currentView: view };
 
         try {
@@ -2526,9 +2704,21 @@ const AppContent = () => {
         setShowStickyHeader(true);
 
         if (view === 'timetable' && event) {
-            const datesForEvent = timetableData.filter(item => item.event === event && item.date !== 'N/A').map(item => item.date);
-            const firstDateForEvent = [...new Set(datesForEvent)].sort((a, b) => parseDateForSorting(a) - parseDateForSorting(b))[0];
-            setSelectedDate(firstDateForEvent || 'all-performances');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const futureDatesForEvent = timetableData
+                .filter(item => {
+                    if (item.event !== event || !item.date || item.date === 'N/A') return false;
+                    const performanceDate = parseDateForSorting(item.date);
+                    return performanceDate && performanceDate >= today;
+                })
+                .map(item => item.date);
+
+            const firstUpcomingDate = [...new Set(futureDatesForEvent)]
+                .sort((a, b) => parseDateForSorting(a) - parseDateForSorting(b))[0];
+            
+            setSelectedDate(firstUpcomingDate || 'all-performances');
         } else if (view === 'favorites') {
             setSelectedDate('favorites-view');
         } else if (view === 'friends-favorites') {
@@ -2540,40 +2730,6 @@ const AppContent = () => {
         window.scrollTo({ top: 0, behavior: 'auto'});
     });
   }, [timetableData, handleAnimatedUpdate]);
-
-  const handleClearFriendsFavorites = useCallback(() => {
-      setFriendsFavorites(new Set());
-      localStorage.removeItem('ctfFriendsFavorites');
-      returnToInitialView();
-  }, [returnToInitialView]);
-
-
-  const handleStickyLogoClick = useCallback(() => {
-    returnToInitialView();
-  }, [returnToInitialView]);
-
-  useEffect(() => {
-      const handlePopState = (event) => {
-          const state = event.state;
-          if (!state || state.view === 'initial' || !window.location.hash) {
-              returnToInitialView();
-          } else if (state.view === 'detail') {
-              handleAnimatedUpdate(() => {
-                setIsInitialLoad(false);
-                setCurrentView(state.currentView || 'timetable');
-                setSelectedEvent(state.event);
-                if(state.currentView === 'timetable') setEventViewMode(state.viewMode || 'card');
-                setShowStickyHeader(true);
-              });
-          }
-      };
-
-      window.addEventListener('popstate', handlePopState);
-      
-      return () => {
-          window.removeEventListener('popstate', handlePopState);
-      };
-  }, [returnToInitialView, handleAnimatedUpdate]);
 
   const openContentPopup = useCallback((type, data) => {
     let finalData = data;
@@ -2588,9 +2744,33 @@ const AppContent = () => {
     setShowPopup(true);
   }, []); 
 
+  const handleOpenCallSelect = useCallback((item) => {
+      const itemText = item.tekst?.[language] || item.tekst?.nl;
+      if (item.weergave && itemText) {
+          openContentPopup('customText', {
+              text: itemText,
+              imageUrl: item.imageUrl
+          });
+          try {
+              const base = window.location.pathname.replace(/\/opencall$/, '');
+              window.history.pushState({ view: 'opencall' }, '', base + '/opencall');
+          } catch (e) {
+              console.warn("Could not update history state for Open Call:", e);
+          }
+      }
+  }, [language, openContentPopup]);
+
   const closePopup = useCallback(() => {
       setShowPopup(false);
       stopSpeaking();
+      if (window.location.pathname.endsWith('/opencall')) {
+          try {
+            const base = window.location.pathname.replace(/\/opencall$/, '');
+            window.history.pushState({ view: 'initial' }, '', base + '#');
+          } catch(e) {
+            console.warn("Could not update history state:", e);
+          }
+      }
   }, [stopSpeaking]); 
 
   useEffect(() => {
@@ -2616,7 +2796,7 @@ const AppContent = () => {
   }, [openContentPopup]);
 
   useEffect(() => {
-    const isModalOpen = showPopup || showPrivacyPolicy || messageBoxConfig.show || showExportModal || showImportPopup;
+    const isModalOpen = showPopup || showPrivacyPolicy || messageBoxConfig.show || showExportModal || showImportPopup || cookieConsent === null;
     const mainContentEl = document.getElementById('main-content-area');
 
     if (isModalOpen) {
@@ -2631,10 +2811,15 @@ const AppContent = () => {
       document.body.style.overflow = '';
       if (mainContentEl) mainContentEl.style.overflow = 'auto';
     };
-  }, [showPopup, showPrivacyPolicy, messageBoxConfig.show, showExportModal, showImportPopup]);
+  }, [showPopup, showPrivacyPolicy, messageBoxConfig.show, showExportModal, showImportPopup, cookieConsent]);
 
   useEffect(() => {
     try {
+      const storedConsent = localStorage.getItem('cookieConsent');
+      if (storedConsent) {
+        setCookieConsent(storedConsent);
+      }
+      
       const storedFavorites = localStorage.getItem('ctfTimetableFavorites');
       if (storedFavorites) setFavorites(new Set(JSON.parse(storedFavorites)));
 
@@ -2703,7 +2888,6 @@ const AppContent = () => {
 
   const handleLanguageChange = () => setLanguage(prev => prev === 'nl' ? 'en' : 'nl');
 
-  // ========= WIJZIGING: Data ophalen en verwerken aangepast =========
   const fetchDataFromAppwrite = useCallback(async () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 20000);
@@ -2725,7 +2909,6 @@ const AppContent = () => {
             return documents;
         };
 
-        // Haal alle benodigde data op, inclusief de nieuwe Marketing collectie
         const [
             companies, performances, locations, executions,
             eventsData, sponsors, news, info, accessibility, marketing
@@ -2739,12 +2922,10 @@ const AppContent = () => {
             fetchAllDocuments(APPWRITE_CONFIG.collections.news),
             fetchAllDocuments(APPWRITE_CONFIG.collections.info),
             fetchAllDocuments(APPWRITE_CONFIG.collections.toegankelijkheid),
-            // BELANGRIJK: Voeg 'marketing: '689e0665000be7c7c1a5'' toe aan de APPWRITE_CONFIG in react-app-1
             fetchAllDocuments(APPWRITE_CONFIG.collections.marketing) 
         ]);
         clearTimeout(timeoutId);
 
-        // Maak Maps voor snelle toegang tot data
         const companiesMap = new Map(companies.map(c => [c.$id, c]));
         const performancesMap = new Map(performances.map(p => [p.$id, p]));
         const locationsMap = new Map(locations.map(l => [l.$id, l]));
@@ -2754,7 +2935,6 @@ const AppContent = () => {
         const localEventInfoMap = {};
         let allParsedData = [];
 
-        // Filter events op basis van het 'InApp' attribuut
         const eventsInApp = eventsData.filter(event => event.InApp === true);
 
         for (const eventDoc of eventsInApp) {
@@ -2777,7 +2957,6 @@ const AppContent = () => {
                 const locationData = locationsMap.get(execution.locationId);
                 if (!locationData) continue;
 
-                // Haal marketinginformatie op voor deze voorstelling
                 const marketingInfo = marketingMap.get(performance.$id);
 
                 const dateTime = new Date(execution.DateTime);
@@ -2791,7 +2970,6 @@ const AppContent = () => {
                     localEventInfoMap[eventDoc.Name].dateString = eventDate;
                 }
 
-                // Voeg de samengestelde data, inclusief marketing info, toe aan de lijst
                 allParsedData.push({
                     id: execution.$id,
                     date: eventDate,
@@ -2818,7 +2996,6 @@ const AppContent = () => {
                         diningFacility: locationData.hasDining || false,
                         hasNGT: execution.hasNgt || false,
                     },
-                    // Nieuwe marketing data velden
                     marketingCredits: marketingInfo?.Credits || null,
                     marketingVoorstellingNL: marketingInfo?.VoorstellingstekstNL || null,
                     marketingVoorstellingENG: marketingInfo?.VoorstellingstekstENG || null,
@@ -2831,8 +3008,6 @@ const AppContent = () => {
             }
         }
         
-        // De logica om events met voorstellingen in het verleden te verbergen is verwijderd
-        // conform de instructie "in plaats van". Nu worden alle events met InApp=true getoond.
         const filteredDataForDisplay = allParsedData;
         
         const uniqueEventsForDisplay = Object.keys(localEventInfoMap)
@@ -2842,19 +3017,25 @@ const AppContent = () => {
         const tempGeneralInfoItems = info.map(item => ({
             title: { nl: item.NameNl, en: item.NameEng },
             url: { nl: item.MeerInfoNl, en: item.MeerInfoEng },
-            imageUrl: { nl: item.MeerInfoAfbeelding, en: item.MeerInfoAfbeelding }
+            imageUrl: item.MeerInfoAfbeelding,
+            weergave: item.Weergave || false,
+            tekst: { nl: item.TekstNL, en: item.TekstENG }
         }));
         
         const tempAccessibilityInfoItems = accessibility.map(item => ({
             title: { nl: item.ToegankelijkheidTitleNl, en: item.ToegankelijkheidTitleEng },
             url: { nl: item.ToegankelijkheidUrlNl, en: item.ToegankelijkheidUrlEng },
-            imageUrl: { nl: item.ToegankelijkheidAfbeelding, en: item.ToegankelijkheidAfbeelding }
+            imageUrl: item.ToegankelijkheidAfbeelding,
+            weergave: item.Weergave || false,
+            tekst: { nl: item.TekstNL, en: item.TekstENG }
         }));
 
         const tempNewsItems = news.map(item => ({
             title: { nl: item.NieuwsTitelNl, en: item.NieuwsTitelEng },
             url: { nl: item.NieuwsUrlNl, en: item.NieuwsUrlEng },
-            imageUrl: { nl: item.NieuwsAfbeelding, en: item.NieuwsAfbeelding }
+            imageUrl: item.NieuwsAfbeelding,
+            weergave: item.Weergave || false,
+            tekst: { nl: item.TekstNL, en: item.TekstENG }
         }));
 
         const tempBenefactorLogos = sponsors.map(item => ({ url: item.LogoSponsor, name: item.Name }));
@@ -2875,7 +3056,7 @@ const AppContent = () => {
             news: tempNewsItems, benefactors: tempBenefactorLogos, timestamp: new Date().getTime()
         }));
         
-        return filteredDataForDisplay;
+        return { generalInfo: tempGeneralInfoItems, timetable: filteredDataForDisplay };
 
     } catch (err) {
         console.error("Fout bij het ophalen van Appwrite gegevens:", err);
@@ -2883,6 +3064,8 @@ const AppContent = () => {
 
         if (cached) {
             setIsOffline(true);
+            const { generalInfo } = JSON.parse(cached);
+            return { generalInfo: generalInfo || [], timetable: timetableData };
         } else {
             if (err.name === 'AbortError') {
                  setError(translations[language].common.errorTimeout);
@@ -2890,7 +3073,7 @@ const AppContent = () => {
                  setError(translations[language].common.errorLoading);
             }
         }
-        return timetableData;
+        return { generalInfo: [], timetable: timetableData };
     }
   }, [language, translations, timetableData]);
 
@@ -2898,16 +3081,18 @@ const AppContent = () => {
     const init = async () => {
         setLoading(true);
         let dataFromCache = [];
+        let generalInfoFromCache = [];
         
         try {
             const cached = localStorage.getItem('ctfAppwriteCache');
             if (cached) {
                 const { data, eventInfoMap, uniqueEvents, generalInfo, accessibilityInfo, news, benefactors } = JSON.parse(cached);
                 dataFromCache = data || [];
+                generalInfoFromCache = generalInfo || [];
                 setTimetableData(dataFromCache);
                 setEventInfoMap(eventInfoMap || {});
                 setUniqueEvents(uniqueEvents || []);
-                setGeneralInfoData(generalInfo || []);
+                setGeneralInfoData(generalInfoFromCache);
                 setAccessibilityInfoData(accessibilityInfo || []);
                 setNewsData(news || []);
                 setBenefactorLogos(benefactors || []);
@@ -2917,34 +3102,44 @@ const AppContent = () => {
             localStorage.clear();
         }
         
-        const fetchedData = await fetchDataFromAppwrite();
-        const finalData = fetchedData.length > 0 ? fetchedData : dataFromCache;
+        const { generalInfo: fetchedGeneralInfo, timetable: fetchedTimetable } = await fetchDataFromAppwrite();
+        const finalTimetableData = fetchedTimetable.length > 0 ? fetchedTimetable : dataFromCache;
+        const finalGeneralInfo = fetchedGeneralInfo.length > 0 ? fetchedGeneralInfo : generalInfoFromCache;
+
+        const openCalls = finalGeneralInfo.filter(item => {
+            const titleNl = item.title?.nl || '';
+            const titleEn = item.title?.en || '';
+            return titleNl.toLowerCase().includes('open call') || titleEn.toLowerCase().includes('open call');
+        });
+        setOpenCallItems(openCalls);
 
         const urlParams = new URLSearchParams(window.location.search);
         const favoriteIndicesParam = urlParams.get('fav_indices');
         const favoriteIdsParam = urlParams.get('favorites');
+        const path = window.location.pathname;
 
         let performancesToImport = [];
 
         if (favoriteIndicesParam) {
             try {
                 const decodedIndices = atob(favoriteIndicesParam).split(',').map(Number);
-                performancesToImport = decodedIndices.map(index => finalData[index]).filter(Boolean);
-            } catch (e) {
-                console.error("Error decoding favorite indices from URL", e);
-            }
+                performancesToImport = decodedIndices.map(index => finalTimetableData[index]).filter(Boolean);
+            } catch (e) { console.error("Error decoding favorite indices from URL", e); }
         } else if (favoriteIdsParam) {
             try {
                 const decodedIds = atob(favoriteIdsParam).split(',');
-                performancesToImport = finalData.filter(p => decodedIds.includes(p.id));
-            } catch (e) {
-                console.error("Error decoding favorite IDs from URL", e);
-            }
+                performancesToImport = finalTimetableData.filter(p => decodedIds.includes(p.id));
+            } catch (e) { console.error("Error decoding favorite IDs from URL", e); }
         }
 
         if (performancesToImport.length > 0) {
             setSharedFavoritesForImport(performancesToImport);
             setShowImportPopup(true);
+        } else if (path.endsWith('/opencall')) {
+            const openCallItem = openCalls[0];
+            if (openCallItem) {
+                handleOpenCallSelect(openCallItem);
+            }
         } else {
             const hash = window.location.hash.substring(1);
             if (hash && hash !== '#') {
@@ -3278,7 +3473,16 @@ const AppContent = () => {
   const datesForCurrentSelectedEvent = useMemo(() => {
     if (currentView !== 'timetable' || !selectedEvent) return [];
 
-    let eventPerformances = timetableData.filter(item => item.event === selectedEvent && item.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let eventPerformances = timetableData.filter(item => {
+        if (item.event !== selectedEvent || !item.date) return false;
+        
+        const performanceDate = parseDateForSorting(item.date);
+        
+        return performanceDate && performanceDate >= today;
+    });
 
     const filtersAreActive = iconFilters.size > 0 || genreFilters.size > 0;
     if (filtersAreActive) {
@@ -3292,6 +3496,7 @@ const AppContent = () => {
     return [...new Set(eventPerformances.map(item => item.date))]
            .sort((a, b) => parseDateForSorting(a) - parseDateForSorting(b));
   }, [timetableData, selectedEvent, currentView, iconFilters, genreFilters]);
+
 
   const toggleFavorite = useCallback((itemObject, e) => {
     e.stopPropagation();
@@ -3378,6 +3583,14 @@ const AppContent = () => {
     newsSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
   
+  const handleCookieChoice = (choice) => {
+    localStorage.setItem('cookieConsent', choice);
+    setCookieConsent(choice);
+    if (choice === 'all') {
+        console.log("Marketing en analytics cookies zijn nu ingeschakeld.");
+    }
+  };
+  
   const renderMainContent = () => {
       if (loading && isInitialLoad) {
         return (
@@ -3391,7 +3604,7 @@ const AppContent = () => {
           return (
               <div className={`transition-opacity duration-300 ${isContentVisible ? 'opacity-100' : 'opacity-0'}`}>
                   <MoreInfoPage
-                      generalInfoItems={generalInfoData}
+                      generalInfoItems={generalInfoData.filter(item => !openCallItems.includes(item))}
                       accessibilityInfoItems={accessibilityInfoData}
                       openContentPopup={openContentPopup}
                       language={language}
@@ -3495,6 +3708,47 @@ const AppContent = () => {
       )
   }
 
+  const handleClearFriendsFavorites = useCallback(() => {
+      setFriendsFavorites(new Set());
+      localStorage.removeItem('ctfFriendsFavorites');
+      returnToInitialView();
+  }, [returnToInitialView]);
+
+
+  const handleStickyLogoClick = useCallback(() => {
+    returnToInitialView();
+  }, [returnToInitialView]);
+
+  useEffect(() => {
+      const handlePopState = (event) => {
+          const state = event.state;
+          const path = window.location.pathname;
+          
+          if (path.endsWith('/opencall')) {
+              const openCallItem = openCallItems[0];
+              if (openCallItem && !showPopup) {
+                  handleOpenCallSelect(openCallItem);
+              }
+          } else if (!state || state.view === 'initial' || !window.location.hash) {
+              returnToInitialView();
+          } else if (state.view === 'detail') {
+              handleAnimatedUpdate(() => {
+                setIsInitialLoad(false);
+                setCurrentView(state.currentView || 'timetable');
+                setSelectedEvent(state.event);
+                if(state.currentView === 'timetable') setEventViewMode(state.viewMode || 'card');
+                setShowStickyHeader(true);
+              });
+          }
+      };
+
+      window.addEventListener('popstate', handlePopState);
+      
+      return () => {
+          window.removeEventListener('popstate', handlePopState);
+      };
+  }, [returnToInitialView, handleAnimatedUpdate, openCallItems, handleOpenCallSelect, showPopup]);
+
   return (
     <>
     <style>{`
@@ -3527,6 +3781,8 @@ const AppContent = () => {
           onReadPage={handleReadPage}
           openContentPopup={openContentPopup}
           isInitialLoad={isInitialLoad}
+          openCallItems={openCallItems}
+          onOpenCallSelect={handleOpenCallSelect}
       />
       
       <OfflineIndicator 
@@ -3547,7 +3803,7 @@ const AppContent = () => {
                 </div>
                 <div className="relative z-10 w-full">
                   <div className="absolute top-12 left-4 flex flex-col space-y-2 items-start sm:flex-row sm:space-y-0 sm:space-x-2 sm:items-center">
-                      <button onClick={() => openContentPopup('iframe', 'https://form.jotform.com/223333761374051')} className="px-3 py-1 h-8 sm:h-10 rounded-full bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50 transition-colors duration-200 text-sm font-semibold">
+                      <button onClick={() => openContentPopup('iframe', 'https://ldegroen.github.io/Stamgastenformulier/')} className="px-3 py-1 h-8 sm:h-10 rounded-full bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50 transition-colors duration-200 text-sm font-semibold">
                         {translations[language].common.becomeRegularGuest}
                       </button>
                       <button onClick={() => setShowPrivacyPolicy(true)} className="px-3 py-1 h-8 sm:h-10 rounded-full bg-white bg-opacity-30 text-gray-100 hover:bg-opacity-50 transition-colors duration-200 text-sm font-semibold">
@@ -3572,7 +3828,9 @@ const AppContent = () => {
                           hasFriendsFavorites={friendsFavorites.size > 0}
                           uniqueEvents={uniqueEvents} 
                           language={language} 
-                          translations={translations} 
+                          translations={translations}
+                          openCallItems={openCallItems}
+                          onOpenCallSelect={handleOpenCallSelect}
                       />
                     </div>
                   )}
@@ -3621,7 +3879,6 @@ const AppContent = () => {
         translations={translations[language]}
       />
       
-      {/* ========= WIJZIGING: Nudges hier geplaatst voor correcte positionering ========= */}
       {!isInitialLoad && (
         <SearchFilterNudges
             searchTerm={searchTerm}
@@ -3645,6 +3902,16 @@ const AppContent = () => {
           accessibilitySettings={accessibilitySettings} 
           setAccessibilitySettings={setAccessibilitySettings}
       />
+      
+      {cookieConsent === null && (
+        <CookieConsentPopup
+            onAcceptAll={() => handleCookieChoice('all')}
+            onAcceptFunctional={() => handleCookieChoice('functional')}
+            onDecline={() => handleCookieChoice('declined')}
+            language={language}
+            translations={translations}
+        />
+      )}
 
       {exportConfig && (
           <div style={{ position: 'absolute', left: '-9999px', top: 0, backgroundColor: '#20747f', padding: '20px' }}>
