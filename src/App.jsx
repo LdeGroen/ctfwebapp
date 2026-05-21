@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Client, Databases, Query } from 'appwrite';
+import { Client, Databases, Query } from './config/appwrite';
 import ReactGA from 'react-ga4';
 
 // Config

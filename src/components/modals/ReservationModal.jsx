@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Client, Databases, ID } from 'appwrite';
-import { APPWRITE_CONFIG } from '../../config/appwrite';
+import { Client, Databases, ID, APPWRITE_CONFIG } from '../../config/appwrite';
 
 
 const applyFormattingLocal = (text) => {
