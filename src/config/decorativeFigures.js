@@ -1,8 +1,8 @@
 export const DECORATIVE_FIGURES = [
-    'https://media.cafetheaterfestival.nl/wp-content/uploads/2025/12/cafe-theater-festival-man-met-koffie-scaled.png',
-    'https://media.cafetheaterfestival.nl/wp-content/uploads/2025/12/cafe-theater-festival-breakdancer-scaled.png',
-    'https://media.cafetheaterfestival.nl/wp-content/uploads/2025/12/cafe-theater-festival-drag-queen-scaled.png',
-    'https://media.cafetheaterfestival.nl/wp-content/uploads/2025/12/cafe-theater-festival-viool-speelster-scaled.png'
+    'https://pub-36abfb48eca14eb8b366a0211191ef0e.r2.dev/legacy/cafe-theater-festival-man-met-koffie-scaled.png',
+    'https://pub-36abfb48eca14eb8b366a0211191ef0e.r2.dev/legacy/cafe-theater-festival-breakdancer-scaled.png',
+    'https://pub-36abfb48eca14eb8b366a0211191ef0e.r2.dev/legacy/cafe-theater-festival-drag-queen-scaled.png',
+    'https://pub-36abfb48eca14eb8b366a0211191ef0e.r2.dev/legacy/cafe-theater-festival-viool-speelster-scaled.png'
 ];
 
 // Helper om willekeurige figuren te kiezen op basis van een seed (zodat het stabiel blijft per pagina) of random

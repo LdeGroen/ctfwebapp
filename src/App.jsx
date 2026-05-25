@@ -2098,7 +2098,7 @@ const AppContent = () => {
               <div className="w-full flex flex-col items-center p-4 sm:p-6 md:p-8">
                 <div className={`fixed inset-x-0 bottom-0 z-0 transition-opacity duration-700 ${isInitialLoad ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                   <div className="relative w-full max-w-md mx-auto translate-y-24">
-                    <img src="https://media.cafetheaterfestival.nl/wp-content/uploads/2025/12/CafeI-theater-festival-2026-met-blauwe-verfklodderpng-scaled.png" alt="Afbeelding van campagnebeeld Café Theater Festival" className="w-full h-auto pointer-events-none" />
+                    <img src="https://pub-36abfb48eca14eb8b366a0211191ef0e.r2.dev/legacy/CafeI-theater-festival-2026-met-blauwe-verfklodderpng-scaled.png" alt="Afbeelding van campagnebeeld Café Theater Festival" className="w-full h-auto pointer-events-none" />
                   </div>
 
                   <img
