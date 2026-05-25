@@ -27,7 +27,7 @@ const StickyHeader = ({ isVisible, uniqueEvents, handleEventClick, handleFavorit
                 <div className="relative flex h-24 sm:h-20 items-end justify-center bg-black/20 backdrop-blur-md rounded-b-xl px-4 shadow-lg pb-2">
                     <div className="absolute left-4 bottom-2 flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-4">
                        {isInitialLoad ? (
-                           <img onClick={onLogoClick} className="h-16 w-auto cursor-pointer" src="https://media.cafetheaterfestival.nl/wp-content/uploads/2025/08/fav-wit-1.png" alt="Afbeelding van Café Theater Festival Logo"/>
+                           <img onClick={onLogoClick} className="h-16 w-auto cursor-pointer" src="/fav-wit-1.png" alt="Afbeelding van Café Theater Festival Logo"/>
                        ) : (
                            <button
                                 onClick={onLogoClick}
